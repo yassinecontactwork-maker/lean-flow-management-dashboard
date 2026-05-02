@@ -4,11 +4,8 @@ import { ThemeProvider, createTheme, styled } from '@mui/material/styles';
 import CssBaseline from '@mui/material/CssBaseline';
 import { Box, CircularProgress, LinearProgress, Typography } from '@mui/material';
 import { authAPI } from './services/api';
-
-         
 import Layout from './components/Layout';
 
-               
 const Login = lazy(() => import('./pages/Login'));
 const Register = lazy(() => import('./pages/Register'));
 const Dashboard = lazy(() => import('./pages/Dashboard'));
@@ -74,18 +71,20 @@ const buildTheme = (mode) => {
     shape: { borderRadius: 16 },
     typography: {
       fontFamily: 'var(--font-body)',
-      h1: { fontFamily: 'var(--font-display)', fontWeight: 700, letterSpacing: 0 },
-      h2: { fontFamily: 'var(--font-display)', fontWeight: 700, letterSpacing: 0 },
-      h3: { fontFamily: 'var(--font-display)', fontWeight: 700, letterSpacing: 0 },
-      h4: { fontFamily: 'var(--font-display)', fontWeight: 700, letterSpacing: 0 },
-      h5: { fontFamily: 'var(--font-display)', fontWeight: 700, letterSpacing: 0 },
-      h6: { fontFamily: 'var(--font-display)', fontWeight: 700, letterSpacing: 0 },
-      subtitle1: { fontWeight: 600, letterSpacing: 0 },
-      subtitle2: { fontWeight: 600, letterSpacing: 0 },
-      body1: { lineHeight: 1.65, letterSpacing: 0 },
-      body2: { lineHeight: 1.55, letterSpacing: 0 },
-      overline: { fontWeight: 700, letterSpacing: 0 },
-      button: { textTransform: 'none', fontWeight: 700, letterSpacing: 0 },
+      htmlFontSize: 16,
+      h1: { fontFamily: 'var(--font-display)', fontSize: '2rem', lineHeight: 1.2, fontWeight: 800, letterSpacing: 0 },
+      h2: { fontFamily: 'var(--font-display)', fontSize: '1.5rem', lineHeight: 1.25, fontWeight: 700, letterSpacing: 0 },
+      h3: { fontFamily: 'var(--font-display)', fontSize: '2rem', lineHeight: 1.2, fontWeight: 800, letterSpacing: 0 },
+      h4: { fontFamily: 'var(--font-display)', fontSize: '2rem', lineHeight: 1.2, fontWeight: 800, letterSpacing: 0 },
+      h5: { fontFamily: 'var(--font-display)', fontSize: '1.5rem', lineHeight: 1.25, fontWeight: 700, letterSpacing: 0 },
+      h6: { fontFamily: 'var(--font-display)', fontSize: '1.25rem', lineHeight: 1.35, fontWeight: 700, letterSpacing: 0 },
+      subtitle1: { fontSize: '1rem', fontWeight: 650, letterSpacing: 0 },
+      subtitle2: { fontSize: '0.94rem', fontWeight: 650, letterSpacing: 0 },
+      body1: { fontSize: '0.98rem', lineHeight: 1.65, letterSpacing: 0 },
+      body2: { fontSize: '0.92rem', lineHeight: 1.55, letterSpacing: 0 },
+      caption: { fontSize: '0.82rem', lineHeight: 1.45, letterSpacing: 0 },
+      overline: { fontSize: '0.82rem', fontWeight: 700, letterSpacing: 0 },
+      button: { fontSize: '0.94rem', textTransform: 'none', fontWeight: 700, letterSpacing: 0 },
     },
     components: {
       MuiCssBaseline: {
@@ -115,7 +114,7 @@ const buildTheme = (mode) => {
             border: `1px solid ${borderColor}`,
             backgroundImage: 'none',
             backgroundColor: surface,
-            boxShadow: isDark ? '0 18px 42px rgba(0, 0, 0, 0.32)' : '0 10px 24px rgba(15, 23, 42, 0.06)',
+            boxShadow: isDark ? '0 18px 42px rgba(0, 0, 0, 0.32)' : '0 12px 30px rgba(15, 23, 42, 0.07)',
           },
         },
       },
@@ -123,7 +122,8 @@ const buildTheme = (mode) => {
         styleOverrides: {
           root: {
             borderRadius: 12,
-            padding: '10px 20px',
+            minHeight: 44,
+            padding: '10px 18px',
             fontWeight: 700,
             letterSpacing: 0,
             boxShadow: 'none',
@@ -131,17 +131,21 @@ const buildTheme = (mode) => {
           },
           containedPrimary: {
             background: 'linear-gradient(135deg, #2563EB 0%, #1D4ED8 100%)',
+            color: '#FFFFFF',
             boxShadow: '0 10px 22px rgba(37, 99, 235, 0.22)',
             '&:hover': {
               background: '#1D4ED8',
+              color: '#FFFFFF',
               boxShadow: '0 12px 26px rgba(37, 99, 235, 0.26)',
             },
           },
           containedSecondary: {
             background: 'linear-gradient(135deg, #0F766E 0%, #0D9488 100%)',
+            color: '#FFFFFF',
             boxShadow: '0 10px 22px rgba(15, 118, 110, 0.2)',
             '&:hover': {
               background: '#0F766E',
+              color: '#FFFFFF',
               boxShadow: '0 12px 26px rgba(15, 118, 110, 0.24)',
             },
           },
@@ -168,14 +172,18 @@ const buildTheme = (mode) => {
           root: ({ ownerState }) => {
             const tone = chipStyles[ownerState.color] || chipStyles.default;
             return {
-              minHeight: 28,
+              minHeight: 30,
+              paddingInline: 2,
               borderRadius: 999,
               border: `1px solid ${tone.border}`,
               backgroundColor: tone.bg,
               color: tone.fg,
               fontWeight: 700,
               letterSpacing: 0,
-              fontSize: '0.76rem',
+              fontSize: '0.8rem',
+              '& .MuiChip-label': {
+                paddingInline: 10,
+              },
               '& .MuiChip-icon': {
                 color: 'inherit',
               },
@@ -231,13 +239,15 @@ const buildTheme = (mode) => {
       MuiTableCell: {
         styleOverrides: {
           root: {
-            padding: '15px 18px',
+            padding: '16px 18px',
+            fontSize: '0.96rem',
+            color: textPrimary,
           },
           head: {
             fontWeight: 700,
             textTransform: 'uppercase',
             letterSpacing: 0,
-            fontSize: '0.76rem',
+            fontSize: '0.84rem',
             color: textSecondary,
             borderBottom: `1px solid ${borderColor}`,
           },
@@ -260,6 +270,7 @@ const buildTheme = (mode) => {
         styleOverrides: {
           root: {
             borderRadius: 12,
+            minHeight: 48,
             backgroundColor: isDark ? 'rgba(15, 23, 42, 0.72)' : '#FFFFFF',
             transition: 'box-shadow 0.2s ease, border-color 0.2s ease',
             '&:hover': {
@@ -274,12 +285,43 @@ const buildTheme = (mode) => {
           },
         },
       },
+      MuiInputBase: {
+        styleOverrides: {
+          input: {
+            fontSize: '0.98rem',
+          },
+        },
+      },
+      MuiInputLabel: {
+        styleOverrides: {
+          root: {
+            fontSize: '0.92rem',
+            fontWeight: 600,
+          },
+        },
+      },
+      MuiFormHelperText: {
+        styleOverrides: {
+          root: {
+            fontSize: '0.86rem',
+            marginTop: 6,
+          },
+        },
+      },
       MuiDialogTitle: {
         styleOverrides: {
           root: {
             fontFamily: 'var(--font-display)',
             fontWeight: 700,
             letterSpacing: 0,
+            borderBottom: `1px solid ${borderColor}`,
+          },
+        },
+      },
+      MuiDialogContent: {
+        styleOverrides: {
+          root: {
+            paddingTop: 24,
           },
         },
       },

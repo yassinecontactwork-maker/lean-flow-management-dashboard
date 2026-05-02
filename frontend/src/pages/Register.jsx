@@ -10,9 +10,7 @@ import {
   Alert,
   InputAdornment,
   IconButton,
-  Divider,
   Chip,
-  Grid,
   Stack,
 } from '@mui/material';
 import {
@@ -22,15 +20,17 @@ import {
   Visibility,
   VisibilityOff,
   Badge as BadgeIcon,
-  Engineering as EngineeringIcon,
+  Factory as FactoryIcon,
+  Analytics as AnalyticsIcon,
+  CheckCircle as CheckCircleIcon,
 } from '@mui/icons-material';
 import { useNavigate } from 'react-router-dom';
 import { authAPI } from '../services/api';
 
 const roles = [
   { value: 'ADMIN', label: 'Administrateur', color: 'error' },
-  { value: 'RESP_PROD', label: 'Responsable Production', color: 'warning' },
-  { value: 'SUPPLY_CHAIN_MANAGER', label: 'Supply Chain Manager', color: 'info' },
+  { value: 'RESP_PROD', label: 'Responsable production', color: 'warning' },
+  { value: 'SUPPLY_CHAIN_MANAGER', label: 'Responsable supply chain', color: 'info' },
   { value: 'OPERATEUR', label: 'Opérateur', color: 'success' },
 ];
 
@@ -42,12 +42,24 @@ function Register() {
     prenom: '',
     email: '',
     password: '',
+    confirmPassword: '',
     role: '',
   });
   const [errors, setErrors] = useState({});
   const [success, setSuccess] = useState(false);
   const [loading, setLoading] = useState(false);
   const [serverError, setServerError] = useState('');
+
+  const accessPreview = [
+    { label: 'Profils atelier', value: '4', tone: 'blue' },
+    { label: 'Méthodes Lean', value: '3', tone: 'green' },
+    { label: 'Droits actifs', value: 'Par rôle', tone: 'amber' },
+  ];
+  const valuePoints = [
+    'Droits adaptés à chaque fonction terrain',
+    'Traçabilité des actions de production',
+    'Pilotage Kanban, CONWIP et DDMRP',
+  ];
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -60,7 +72,10 @@ function Register() {
     if (!formData.nom.trim()) newErrors.nom = 'Nom requis';
     if (!formData.prenom.trim()) newErrors.prenom = 'Prénom requis';
     if (!formData.email.includes('@')) newErrors.email = 'Email invalide';
-    if (formData.password.length < 6) newErrors.password = 'Minimum 6 caracteres';
+    if (formData.password.length < 6) newErrors.password = 'Minimum 6 caractères';
+    if (formData.confirmPassword !== formData.password) {
+      newErrors.confirmPassword = 'Les mots de passe ne correspondent pas';
+    }
     if (!formData.role) newErrors.role = 'Veuillez choisir un rôle';
     return newErrors;
   };
@@ -76,56 +91,129 @@ function Register() {
     setLoading(true);
     setServerError('');
     try {
-      await authAPI.register(formData);
+      const payload = {
+        nom: formData.nom,
+        prenom: formData.prenom,
+        email: formData.email,
+        password: formData.password,
+        role: formData.role,
+      };
+      await authAPI.register(payload);
       setSuccess(true);
       setTimeout(() => {
         navigate('/login', { state: { message: 'Compte créé avec succès. Connectez-vous.' } });
       }, 1200);
     } catch (error) {
-      setServerError(error.response?.data?.error || 'Erreur lors de la creation du compte');
+      setServerError(error.response?.data?.error || 'Erreur lors de la création du compte');
     } finally {
       setLoading(false);
     }
   };
 
   return (
-    <Box
-      sx={{
-        minHeight: '100vh',
-        display: 'grid',
-        gridTemplateColumns: { xs: '1fr', md: '0.95fr 1.05fr' },
-        alignItems: 'center',
-        gap: { xs: 4, md: 0 },
-        px: { xs: 3, md: 8 },
-        py: { xs: 6, md: 8 },
-      }}
-    >
-      <Card className="panel page-entrance" sx={{ maxWidth: 620 }}>
-        <CardContent sx={{ p: { xs: 4, md: 5 } }}>
-          <Typography variant="h4" fontWeight={700} sx={{ mb: 1 }}>
-            Créer un compte
+    <Box className="auth-shell">
+      <Box className="auth-brand page-entrance">
+        <Box className="auth-brand-inner">
+          <Box className="auth-brand-mark">
+            <Box className="auth-logo">
+              <FactoryIcon sx={{ fontSize: 38 }} />
+            </Box>
+            <Box>
+              <Typography className="auth-eyebrow">Habilitations atelier</Typography>
+              <Typography className="auth-system-state">Rôles métier et supervision Lean</Typography>
+            </Box>
+          </Box>
+
+          <Typography component="h1" className="auth-title">
+            Lean Manufacturing
           </Typography>
-          <Typography variant="body2" color="text.secondary" sx={{ mb: 3 }}>
-            Configurez votre profil pour acceder au pilotage industriel
+          <Typography className="auth-kicker">
+            Industrial Control Suite
+          </Typography>
+          <Typography className="auth-copy">
+            Créez un accès sécurisé pour piloter les flux, les encours et les alertes de production.
           </Typography>
 
-          <Divider sx={{ mb: 3 }} />
+          <Box className="auth-badges">
+            <Chip label="Kanban" color="primary" variant="outlined" />
+            <Chip label="CONWIP" color="secondary" variant="outlined" />
+            <Chip label="DDMRP" color="info" variant="outlined" />
+          </Box>
 
-          {success && (
-            <Alert severity="success" sx={{ mb: 3 }}>
-              Compte créé avec succès. Redirection vers la connexion...
-            </Alert>
-          )}
+          <Box className="auth-preview-card">
+            <Box className="auth-preview-header">
+              <Box>
+                <Typography className="auth-preview-title">Accès métier</Typography>
+                <Typography className="auth-preview-subtitle">Production, supply chain et opérations</Typography>
+              </Box>
+              <Box className="auth-preview-icon">
+                <AnalyticsIcon sx={{ fontSize: 22 }} />
+              </Box>
+            </Box>
 
-          {serverError && (
-            <Alert severity="error" sx={{ mb: 3 }}>
-              {serverError}
-            </Alert>
-          )}
+            <Box className="auth-preview-grid">
+              {accessPreview.map((item) => (
+                <Box key={item.label} className={`auth-mini-kpi auth-mini-kpi--${item.tone}`}>
+                  <Typography className="auth-mini-kpi-label">{item.label}</Typography>
+                  <Typography className="auth-mini-kpi-value">{item.value}</Typography>
+                </Box>
+              ))}
+            </Box>
+          </Box>
 
-          <Box component="form" onSubmit={handleSubmit}>
-            <Grid container spacing={3}>
-              <Grid item xs={12} sm={6}>
+          <Stack className="auth-value-list" spacing={1.25}>
+            {valuePoints.map((point) => (
+              <Box key={point} className="auth-value-item">
+                <CheckCircleIcon sx={{ fontSize: 18 }} />
+                <Typography>{point}</Typography>
+              </Box>
+            ))}
+          </Stack>
+        </Box>
+      </Box>
+
+      <Box className="auth-form-zone">
+        <Card className="auth-card auth-card--wide page-entrance">
+          <CardContent>
+            <Typography className="auth-form-eyebrow">Création de profil</Typography>
+            <Typography variant="h4" fontWeight={800} sx={{ mb: 1 }}>
+              Créer un compte
+            </Typography>
+            <Typography variant="body2" color="text.secondary" sx={{ mb: 4 }}>
+              Rejoignez la plateforme de supervision industrielle.
+            </Typography>
+
+            {success && (
+              <Alert severity="success" sx={{ mb: 3 }}>
+                Compte créé avec succès. Redirection vers la connexion...
+              </Alert>
+            )}
+
+            {serverError && (
+              <Alert severity="error" sx={{ mb: 3 }}>
+                {serverError}
+              </Alert>
+            )}
+
+            <Box component="form" onSubmit={handleSubmit}>
+              <Box className="auth-form-grid">
+                <TextField
+                  fullWidth
+                  label="Prénom"
+                  name="prenom"
+                  value={formData.prenom}
+                  onChange={handleChange}
+                  error={!!errors.prenom}
+                  helperText={errors.prenom}
+                  InputProps={{
+                    startAdornment: (
+                      <InputAdornment position="start">
+                        <PersonIcon color="action" />
+                      </InputAdornment>
+                    ),
+                  }}
+                />
+
                 <TextField
                   fullWidth
                   label="Nom"
@@ -142,28 +230,9 @@ function Register() {
                     ),
                   }}
                 />
-              </Grid>
-              <Grid item xs={12} sm={6}>
-                <TextField
-                  fullWidth
-                  label="Prenom"
-                  name="prenom"
-                  value={formData.prenom}
-                  onChange={handleChange}
-                  error={!!errors.prenom}
-                  helperText={errors.prenom}
-                  InputProps={{
-                    startAdornment: (
-                      <InputAdornment position="start">
-                        <PersonIcon color="action" />
-                      </InputAdornment>
-                    ),
-                  }}
-                />
-              </Grid>
 
-              <Grid item xs={12}>
                 <TextField
+                  className="auth-field-full"
                   fullWidth
                   label="Adresse email"
                   name="email"
@@ -171,7 +240,7 @@ function Register() {
                   value={formData.email}
                   onChange={handleChange}
                   error={!!errors.email}
-                  helperText={errors.email || 'Ex: prenom.nom@entreprise.com'}
+                  helperText={errors.email || 'Ex. prenom.nom@entreprise.com'}
                   InputProps={{
                     startAdornment: (
                       <InputAdornment position="start">
@@ -180,9 +249,7 @@ function Register() {
                     ),
                   }}
                 />
-              </Grid>
 
-              <Grid item xs={12}>
                 <TextField
                   fullWidth
                   label="Mot de passe"
@@ -191,7 +258,7 @@ function Register() {
                   value={formData.password}
                   onChange={handleChange}
                   error={!!errors.password}
-                  helperText={errors.password}
+                  helperText={errors.password || 'Minimum 6 caractères'}
                   InputProps={{
                     startAdornment: (
                       <InputAdornment position="start">
@@ -200,20 +267,44 @@ function Register() {
                     ),
                     endAdornment: (
                       <InputAdornment position="end">
-                        <IconButton onClick={() => setShowPassword(!showPassword)} edge="end">
+                        <IconButton onClick={() => setShowPassword(!showPassword)} edge="end" aria-label="Afficher le mot de passe">
                           {showPassword ? <VisibilityOff /> : <Visibility />}
                         </IconButton>
                       </InputAdornment>
                     ),
                   }}
                 />
-              </Grid>
 
-              <Grid item xs={12}>
                 <TextField
+                  fullWidth
+                  label="Confirmation"
+                  name="confirmPassword"
+                  type={showPassword ? 'text' : 'password'}
+                  value={formData.confirmPassword}
+                  onChange={handleChange}
+                  error={!!errors.confirmPassword}
+                  helperText={errors.confirmPassword || 'Confirmez le mot de passe'}
+                  InputProps={{
+                    startAdornment: (
+                      <InputAdornment position="start">
+                        <LockIcon color="action" />
+                      </InputAdornment>
+                    ),
+                    endAdornment: (
+                      <InputAdornment position="end">
+                        <IconButton onClick={() => setShowPassword(!showPassword)} edge="end" aria-label="Afficher le mot de passe">
+                          {showPassword ? <VisibilityOff /> : <Visibility />}
+                        </IconButton>
+                      </InputAdornment>
+                    ),
+                  }}
+                />
+
+                <TextField
+                  className="auth-field-full"
                   select
                   fullWidth
-                  label="Role dans l'entreprise"
+                  label="Rôle dans l'entreprise"
                   name="role"
                   value={formData.role}
                   onChange={handleChange}
@@ -229,81 +320,32 @@ function Register() {
                 >
                   {roles.map((role) => (
                     <MenuItem key={role.value} value={role.value}>
-                      <Chip label={role.label} color={role.color} size="small" sx={{ minWidth: 180 }} />
+                      <Chip label={role.label} color={role.color} size="small" sx={{ minWidth: 190 }} />
                     </MenuItem>
                   ))}
                 </TextField>
-              </Grid>
+              </Box>
 
-              <Grid item xs={12}>
-                <Button
-                  type="submit"
-                  fullWidth
-                  variant="contained"
-                  size="large"
-                  disabled={loading}
-                  sx={{
-                    py: 2,
-                    fontSize: '1.05rem',
-                    fontWeight: 700,
-                  }}
-                >
-                  {loading ? 'Création...' : 'Créer mon compte'}
-                </Button>
-              </Grid>
-            </Grid>
+              <Button
+                className="auth-submit-button"
+                type="submit"
+                fullWidth
+                variant="contained"
+                size="large"
+                disabled={loading}
+              >
+                {loading ? 'Création...' : 'Créer un compte'}
+              </Button>
 
-            <Box sx={{ textAlign: 'center', mt: 4 }}>
-              <Typography variant="body2" color="text.secondary">
-                Déjà un compte ?{' '}
-                <Button color="primary" onClick={() => navigate('/login')} sx={{ fontWeight: 600 }}>
+              <Box className="auth-secondary-action">
+                <Typography variant="body2">Déjà un compte ?</Typography>
+                <Button color="primary" onClick={() => navigate('/login')} size="small" sx={{ fontWeight: 700 }}>
                   Se connecter
                 </Button>
-              </Typography>
+              </Box>
             </Box>
-          </Box>
-        </CardContent>
-      </Card>
-
-      <Box className="page-entrance" sx={{ pl: { md: 6 } }}>
-        <Stack direction="row" spacing={2} alignItems="center" sx={{ mb: 3 }}>
-          <Box
-            sx={{
-              width: 64,
-              height: 64,
-              borderRadius: 3,
-              bgcolor: 'rgba(15, 118, 110, 0.1)',
-              border: '1px solid rgba(15, 118, 110, 0.26)',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-            }}
-          >
-            <EngineeringIcon sx={{ fontSize: 38, color: '#0F766E' }} />
-          </Box>
-          <Box>
-            <Typography variant="h3" fontWeight={700} sx={{ fontFamily: 'var(--font-display)' }}>
-              Profil Industriel
-            </Typography>
-            <Typography variant="body2" color="text.secondary">
-              Accès par rôle aux flux Kanban, CONWIP et DDMRP
-            </Typography>
-          </Box>
-        </Stack>
-
-        <Typography variant="h6" sx={{ mb: 2 }}>
-          Un contrôle de production adapté à chaque fonction
-        </Typography>
-        <Typography variant="body1" color="text.secondary" sx={{ mb: 4 }}>
-          Définissez votre rôle et exploitez les outils d'amélioration continue pour piloter les
-          stocks, les flux et les alertes de l'atelier.
-        </Typography>
-
-        <Stack direction="row" spacing={1} flexWrap="wrap">
-          <Chip label="Segmentation par rôle" color="primary" variant="outlined" />
-          <Chip label="Processus tracés" color="secondary" variant="outlined" />
-          <Chip label="Actions rapides" color="secondary" variant="outlined" />
-        </Stack>
+          </CardContent>
+        </Card>
       </Box>
     </Box>
   );

@@ -112,12 +112,12 @@ function LignesProduction() {
 
       {loading && <LinearProgress />}
 
-      <Grid container spacing={4}>
+      <Grid container spacing={3}>
         {lignes.map((ligne) => (
           <Grid item xs={12} lg={6} key={ligne.id}>
             <Card className="panel" sx={{ height: '100%' }}>
-              <CardContent sx={{ p: 5 }}>
-                <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', mb: 4 }}>
+              <CardContent sx={{ p: 4 }}>
+                <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', mb: 3 }}>
                   <Box>
                     <Typography variant="h5" fontWeight="700">
                       {ligne.nom}
@@ -134,7 +134,7 @@ function LignesProduction() {
                   />
                 </Box>
 
-                <Grid container spacing={4} sx={{ mb: 4 }}>
+                <Grid container spacing={3} sx={{ mb: 3 }}>
                   <Grid item xs={6}>
                     <Typography variant="subtitle1" color="text.secondary" fontWeight="600">
                       WIP Actuel

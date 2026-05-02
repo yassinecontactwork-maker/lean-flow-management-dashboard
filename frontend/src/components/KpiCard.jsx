@@ -6,7 +6,7 @@ function KpiCard({ label, value, foot, icon, tone = 'primary' }) {
 
   return (
     <Card className={`kpi-card ${toneClass}`}>
-      <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: 2 }}>
+      <Box className="kpi-card-main">
         <Box>
           <Typography className="kpi-label">{label}</Typography>
           <Typography className="kpi-value">{value}</Typography>

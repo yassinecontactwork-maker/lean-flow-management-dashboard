@@ -43,7 +43,7 @@ function ScannerKanban() {
       setResult(response.data);
       setAlert({
         severity: 'success',
-        message: response.data.message || 'Carte scannee avec succes',
+        message: response.data.message || 'Carte scannée avec succès',
       });
 
       setScanHistory(prev => [{
@@ -82,7 +82,7 @@ function ScannerKanban() {
     if (!window.isSecureContext) {
       setAlert({
         severity: 'error',
-        message: 'La camera est bloquee. Utilisez https ou http://localhost pour activer la webcam.',
+        message: 'La caméra est bloquée. Utilisez https ou http://localhost pour activer la webcam.',
       });
       return;
     }
@@ -106,13 +106,13 @@ function ScannerKanban() {
         </Alert>
       )}
 
-      <Grid container spacing={4}>
+      <Grid container spacing={3}>
         <Grid item xs={12} lg={6}>
           <Card className="panel" sx={{ height: '100%' }}>
-            <CardContent sx={{ p: 5, textAlign: 'center' }}>
+            <CardContent sx={{ p: 4, textAlign: 'center' }}>
               <Typography variant="h6" fontWeight="600" gutterBottom sx={{ mb: 4 }}>
                 <QrCodeScannerIcon sx={{ fontSize: 32, verticalAlign: 'middle', mr: 1 }} />
-                Scanner avec Webcam
+                Scanner avec webcam
               </Typography>
 
               {!scanning ? (
@@ -169,9 +169,9 @@ function ScannerKanban() {
 
         <Grid item xs={12} lg={6}>
           <Card className="panel" sx={{ height: '100%' }}>
-            <CardContent sx={{ p: 5 }}>
+            <CardContent sx={{ p: 4 }}>
               <Typography variant="h6" fontWeight="600" gutterBottom sx={{ mb: 4 }}>
-                Saisie Manuelle
+                Saisie manuelle
               </Typography>
               <form onSubmit={handleManualSubmit}>
                 <TextField
@@ -250,10 +250,10 @@ function ScannerKanban() {
 
         <Grid item xs={12}>
           <Card className="panel">
-            <CardContent sx={{ p: 5 }}>
+            <CardContent sx={{ p: 4 }}>
               <Typography variant="h6" fontWeight="600" gutterBottom sx={{ mb: 3 }}>
                 <HistoryIcon sx={{ verticalAlign: 'middle', mr: 1 }} />
-                Historique des Scans (10 derniers)
+                Historique des scans (10 derniers)
               </Typography>
               {scanHistory.length === 0 ? (
                 <Typography variant="body1" color="text.secondary" sx={{ textAlign: 'center', py: 4 }}>

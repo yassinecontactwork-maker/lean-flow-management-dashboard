@@ -5,7 +5,7 @@ function PageHeader({ title, subtitle, actions, meta }) {
   return (
     <Box className="page-header">
       <Box>
-        <Typography variant="h4" className="page-title">
+        <Typography component="h1" variant="h4" className="page-title">
           {title}
         </Typography>
         {subtitle && (

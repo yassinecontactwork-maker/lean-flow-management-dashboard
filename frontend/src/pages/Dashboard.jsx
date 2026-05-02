@@ -8,6 +8,7 @@ import {
   CircularProgress,
   Chip,
   Button,
+  Stack,
 } from '@mui/material';
 import {
   Inventory as InventoryIcon,
@@ -15,6 +16,8 @@ import {
   Warning as WarningIcon,
   Report as ReportIcon,
   Refresh as RefreshIcon,
+  AccountTree as AccountTreeIcon,
+  TrendingUp as TrendingUpIcon,
 } from '@mui/icons-material';
 import { Chart as ChartJS, ArcElement, Tooltip, Legend, CategoryScale, LinearScale, BarElement, Title } from 'chart.js';
 import { Pie, Bar } from 'react-chartjs-2';
@@ -24,11 +27,18 @@ import {
   alertesAPI,
   conflitsAPI,
   buffersDDMRPAPI,
+  ticketsConwipAPI,
 } from '../services/api';
 import PageHeader from '../components/PageHeader';
 import KpiCard from '../components/KpiCard';
 
 ChartJS.register(ArcElement, Tooltip, Legend, CategoryScale, LinearScale, BarElement, Title);
+
+const normalizeList = (data) => {
+  if (Array.isArray(data)) return data;
+  if (Array.isArray(data?.results)) return data.results;
+  return [];
+};
 
 function Dashboard() {
   const [loading, setLoading] = useState(true);
@@ -38,6 +48,7 @@ function Dashboard() {
     alertes: null,
     conflits: null,
     buffers: null,
+    tickets: [],
   });
 
   useEffect(() => {
@@ -47,12 +58,13 @@ function Dashboard() {
   const loadStats = async () => {
     try {
       setLoading(true);
-      const [ordresRes, cartesRes, alertesRes, conflitsRes, buffersRes] = await Promise.all([
+      const [ordresRes, cartesRes, alertesRes, conflitsRes, buffersRes, ticketsRes] = await Promise.all([
         ordresFabricationAPI.statistiques(),
         cartesKanbanAPI.statistiques(),
         alertesAPI.statistiques(),
         conflitsAPI.statistiques(),
         buffersDDMRPAPI.statistiques(),
+        ticketsConwipAPI.getAll().catch(() => ({ data: [] })),
       ]);
 
       setStats({
@@ -61,6 +73,7 @@ function Dashboard() {
         alertes: alertesRes.data,
         conflits: conflitsRes.data,
         buffers: buffersRes.data,
+        tickets: normalizeList(ticketsRes.data),
       });
     } catch (error) {
       console.error('Erreur lors du chargement des statistiques:', error);
@@ -89,9 +102,15 @@ function Dashboard() {
         backgroundColor: ['#D97706', '#2563EB', '#16A34A'],
         borderColor: '#ffffff',
         borderWidth: 3,
+        hoverOffset: 6,
       },
     ],
   };
+
+  const ticketsTotal = stats.tickets?.length || 0;
+  const ticketsEnCours = stats.tickets?.filter((ticket) => ticket.statut === 'EN_COURS').length || 0;
+  const buffersVert = stats.buffers?.par_niveau?.vert || 0;
+  const buffersTotal = Object.values(stats.buffers?.par_niveau || {}).reduce((total, value) => total + value, 0);
 
   const buffersChartData = {
     labels: ['Zone Rouge', 'Zone Jaune', 'Zone Verte'],
@@ -106,6 +125,8 @@ function Dashboard() {
         backgroundColor: ['#DC2626', '#D97706', '#16A34A'],
         borderColor: '#ffffff',
         borderWidth: 2,
+        borderRadius: 8,
+        maxBarThickness: 46,
       },
     ],
   };
@@ -117,12 +138,59 @@ function Dashboard() {
       legend: {
         position: 'bottom',
         labels: {
-          padding: 20,
+          usePointStyle: true,
+          pointStyle: 'circle',
+          padding: 18,
+          color: '#64748B',
           font: { size: 13, weight: '600' },
         },
       },
+      tooltip: {
+        backgroundColor: '#0F172A',
+        padding: 12,
+        titleFont: { size: 14, weight: '700' },
+        bodyFont: { size: 14 },
+      },
     },
   };
+
+  const barChartOptions = {
+    ...chartOptions,
+    scales: {
+      x: {
+        grid: { display: false },
+        ticks: { color: '#64748B', font: { size: 13, weight: '600' } },
+      },
+      y: {
+        beginAtZero: true,
+        grid: { color: 'rgba(148, 163, 184, 0.18)' },
+        ticks: { color: '#64748B', precision: 0 },
+      },
+    },
+  };
+
+  const statusBlocks = [
+    {
+      label: 'Alertes résolues',
+      value: stats.alertes?.resolues || 0,
+      color: 'success.main',
+    },
+    {
+      label: 'Alertes actives',
+      value: stats.alertes?.actives || 0,
+      color: 'error.main',
+    },
+    {
+      label: 'Conflits résolus',
+      value: stats.conflits?.resolus || 0,
+      color: 'success.main',
+    },
+    {
+      label: 'Conflits en attente',
+      value: stats.conflits?.en_attente || 0,
+      color: 'warning.main',
+    },
+  ];
 
   return (
     <Box className="page-shell">
@@ -130,13 +198,16 @@ function Dashboard() {
         title="Tableau de bord Lean Manufacturing"
         subtitle="Vue globale sur l'exécution, les flux Kanban/CONWIP et la santé DDMRP."
         actions={
-          <Button
-            variant="outlined"
-            startIcon={<RefreshIcon />}
-            onClick={loadStats}
-          >
-            Actualiser
-          </Button>
+          <Stack direction="row" spacing={1.5} alignItems="center" flexWrap="wrap">
+            <Chip label="Système OK" color="success" variant="outlined" />
+            <Button
+              variant="contained"
+              startIcon={<RefreshIcon />}
+              onClick={loadStats}
+            >
+              Actualiser
+            </Button>
+          </Stack>
         }
       />
 
@@ -145,24 +216,42 @@ function Dashboard() {
           label="Ordres de fabrication"
           value={stats.ordres?.total || 0}
           icon={<AssignmentIcon />}
+          foot={`${stats.ordres?.en_cours || 0} en cours`}
         />
         <KpiCard
           label="Cartes Kanban actives"
           value={stats.cartes?.total || 0}
           icon={<InventoryIcon />}
           tone="warning"
+          foot={`${stats.cartes?.vides || 0} cartes vides`}
+        />
+        <KpiCard
+          label="Tickets CONWIP"
+          value={ticketsTotal}
+          icon={<AccountTreeIcon />}
+          tone="neutral"
+          foot={`${ticketsEnCours} en cours`}
+        />
+        <KpiCard
+          label="Buffers DDMRP"
+          value={buffersTotal}
+          icon={<TrendingUpIcon />}
+          tone="success"
+          foot={`${buffersVert} en zone verte`}
         />
         <KpiCard
           label="Alertes actives"
           value={stats.alertes?.actives || 0}
           icon={<WarningIcon />}
           tone="danger"
+          foot={`${stats.alertes?.resolues || 0} résolues`}
         />
         <KpiCard
           label="Conflits en attente"
           value={stats.conflits?.en_attente || 0}
           icon={<ReportIcon />}
-          tone="neutral"
+          tone="warning"
+          foot={`${stats.conflits?.resolus || 0} résolus`}
         />
       </Box>
 
@@ -170,10 +259,13 @@ function Dashboard() {
         <Grid item xs={12} lg={6}>
           <Card className="panel" sx={{ height: '100%' }}>
             <CardContent className="section-stack" sx={{ p: 4 }}>
-              <Typography variant="h6" fontWeight="600">
-                Répartition des ordres de fabrication
-              </Typography>
-              <Box sx={{ height: 320 }}>
+              <Box className="panel-header">
+                <Box>
+                  <Typography className="panel-title">Répartition des ordres</Typography>
+                  <Typography className="panel-subtitle">Attente, exécution et clôture</Typography>
+                </Box>
+              </Box>
+              <Box sx={{ height: 300 }}>
                 <Pie data={ordresChartData} options={chartOptions} />
               </Box>
             </CardContent>
@@ -183,11 +275,14 @@ function Dashboard() {
         <Grid item xs={12} lg={6}>
           <Card className="panel" sx={{ height: '100%' }}>
             <CardContent className="section-stack" sx={{ p: 4 }}>
-              <Typography variant="h6" fontWeight="600">
-                État des buffers DDMRP
-              </Typography>
-              <Box sx={{ height: 320 }}>
-                <Bar data={buffersChartData} options={chartOptions} />
+              <Box className="panel-header">
+                <Box>
+                  <Typography className="panel-title">État des buffers DDMRP</Typography>
+                  <Typography className="panel-subtitle">Zones rouge, jaune et verte</Typography>
+                </Box>
+              </Box>
+              <Box sx={{ height: 300 }}>
+                <Bar data={buffersChartData} options={barChartOptions} />
               </Box>
             </CardContent>
           </Card>
@@ -196,18 +291,16 @@ function Dashboard() {
         <Grid item xs={12} md={6}>
           <Card className="panel">
             <CardContent className="section-stack" sx={{ p: 4 }}>
-              <Typography variant="h6" fontWeight="600">
-                Situation Kanban
-              </Typography>
+              <Typography className="panel-title">Situation Kanban</Typography>
               <Box className="tag-group" sx={{ mt: 1 }}>
                 <Chip
-                  label={`Cartes Pleines: ${stats.cartes?.pleines || 0}`}
+                  label={`Pleines: ${stats.cartes?.pleines || 0}`}
                   color="success"
                   size="medium"
                   sx={{ fontWeight: 600 }}
                 />
                 <Chip
-                  label={`Cartes Vides: ${stats.cartes?.vides || 0}`}
+                  label={`Vides: ${stats.cartes?.vides || 0}`}
                   color="error"
                   size="medium"
                   sx={{ fontWeight: 600 }}
@@ -226,32 +319,18 @@ function Dashboard() {
         <Grid item xs={12} md={6}>
           <Card className="panel">
             <CardContent className="section-stack" sx={{ p: 4 }}>
-              <Typography variant="h6" fontWeight="600">
-                Alertes et Conflits
-              </Typography>
-              <Box sx={{ display: 'flex', gap: 3, flexWrap: 'wrap' }}>
-                <Box>
-                  <Typography variant="subtitle2" color="text.secondary" fontWeight="600">
-                    Alertes
-                  </Typography>
-                  <Typography variant="h5" color="success.main" fontWeight="700">
-                    {stats.alertes?.resolues || 0} Résolues
-                  </Typography>
-                  <Typography variant="h5" color="error.main" fontWeight="700">
-                    {stats.alertes?.actives || 0} Actives
-                  </Typography>
-                </Box>
-                <Box>
-                  <Typography variant="subtitle2" color="text.secondary" fontWeight="600">
-                    Conflits
-                  </Typography>
-                  <Typography variant="h5" color="success.main" fontWeight="700">
-                    {stats.conflits?.resolus || 0} Résolus
-                  </Typography>
-                  <Typography variant="h5" color="warning.main" fontWeight="700">
-                    {stats.conflits?.en_attente || 0} En attente
-                  </Typography>
-                </Box>
+              <Typography className="panel-title">Alertes et conflits</Typography>
+              <Box className="status-grid">
+                {statusBlocks.map((block) => (
+                  <Box key={block.label} className="status-card">
+                    <Typography variant="caption" color="text.secondary" fontWeight="800">
+                      {block.label}
+                    </Typography>
+                    <Typography variant="h5" color={block.color} fontWeight="800">
+                      {block.value}
+                    </Typography>
+                  </Box>
+                ))}
               </Box>
             </CardContent>
           </Card>

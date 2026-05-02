@@ -112,8 +112,8 @@ function OrdresFabrication() {
       handleCloseDialog();
       loadData();
     } catch (error) {
-      console.error('Erreur lors de la creation:', error);
-      setAlert({ severity: 'error', message: 'Erreur lors de la creation de l\'ordre' });
+      console.error('Erreur lors de la création:', error);
+      setAlert({ severity: 'error', message: 'Erreur lors de la création de l\'ordre' });
     }
   };
 

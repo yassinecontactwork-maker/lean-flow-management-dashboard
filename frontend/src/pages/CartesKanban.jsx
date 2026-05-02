@@ -66,7 +66,7 @@ function CartesKanban() {
   const handleChangerStatut = async (id, nouveauStatut) => {
     try {
       await cartesKanbanAPI.changerStatut(id, nouveauStatut);
-      setAlert({ severity: 'success', message: 'Statut modifie' });
+      setAlert({ severity: 'success', message: 'Statut modifié' });
       loadCartes();
     } catch (error) {
       console.error('Erreur:', error);

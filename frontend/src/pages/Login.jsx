@@ -9,7 +9,6 @@ import {
   Alert,
   InputAdornment,
   IconButton,
-  Divider,
   Chip,
   Stack,
 } from '@mui/material';
@@ -19,7 +18,8 @@ import {
   Visibility,
   VisibilityOff,
   Factory as FactoryIcon,
-  VerifiedUser as VerifiedUserIcon,
+  Analytics as AnalyticsIcon,
+  CheckCircle as CheckCircleIcon,
 } from '@mui/icons-material';
 import { useNavigate, useLocation, Link as RouterLink } from 'react-router-dom';
 import { authAPI } from '../services/api';
@@ -47,6 +47,16 @@ function Login() {
   }, [navigate]);
 
   const successMessage = location.state?.message;
+  const kpiPreview = [
+    { label: 'OF actifs', value: '24', tone: 'blue' },
+    { label: 'Kanban à traiter', value: '128', tone: 'amber' },
+    { label: 'Buffers verts', value: '91%', tone: 'green' },
+  ];
+  const valuePoints = [
+    'Pilotage des flux de production',
+    'Suivi des encours et alertes',
+    'Décisions alignées avec le terrain',
+  ];
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -65,150 +75,157 @@ function Login() {
   };
 
   return (
-    <Box
-      sx={{
-        minHeight: '100vh',
-        display: 'grid',
-        gridTemplateColumns: { xs: '1fr', md: '1.1fr 0.9fr' },
-        alignItems: 'center',
-        gap: { xs: 4, md: 0 },
-        px: { xs: 3, md: 8 },
-        py: { xs: 6, md: 8 },
-      }}
-    >
-      <Box className="page-entrance" sx={{ pr: { md: 6 } }}>
-        <Stack direction="row" spacing={2} alignItems="center" sx={{ mb: 3 }}>
-          <Box
-            sx={{
-              width: 64,
-              height: 64,
-              borderRadius: 3,
-              bgcolor: 'rgba(37, 99, 235, 0.1)',
-              border: '1px solid rgba(37, 99, 235, 0.26)',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-            }}
-          >
-            <FactoryIcon sx={{ fontSize: 38, color: '#2563EB' }} />
+    <Box className="auth-shell">
+      <Box className="auth-brand page-entrance">
+        <Box className="auth-brand-inner">
+          <Box className="auth-brand-mark">
+            <Box className="auth-logo">
+              <FactoryIcon sx={{ fontSize: 38 }} />
+            </Box>
+            <Box>
+              <Typography className="auth-eyebrow">Poste de pilotage Lean</Typography>
+              <Typography className="auth-system-state">Flux tirés, encours et buffers</Typography>
+            </Box>
           </Box>
-          <Box>
-            <Typography variant="h3" fontWeight={700} sx={{ fontFamily: 'var(--font-display)' }}>
-              Lean Manufacturing
-            </Typography>
-            <Typography variant="body2" color="text.secondary">
-              Suite de supervision industrielle pour Kanban, CONWIP et DDMRP
-            </Typography>
+
+          <Typography component="h1" className="auth-title">
+            Lean Manufacturing
+          </Typography>
+          <Typography className="auth-kicker">
+            Industrial Control Suite
+          </Typography>
+          <Typography className="auth-copy">
+            Supervision des flux Kanban, CONWIP et DDMRP en temps réel.
+          </Typography>
+
+          <Box className="auth-badges">
+            <Chip label="Kanban" color="primary" variant="outlined" />
+            <Chip label="CONWIP" color="secondary" variant="outlined" />
+            <Chip label="DDMRP" color="info" variant="outlined" />
           </Box>
-        </Stack>
 
-        <Typography variant="h6" sx={{ mb: 2 }}>
-          Accès sécurisé aux flux de production
-        </Typography>
-        <Typography variant="body1" color="text.secondary" sx={{ mb: 4 }}>
-          Pilotez les buffers, orchestrez les lignes et sécurisez les décisions atelier avec une
-          interface d'ingénierie moderne.
-        </Typography>
+          <Box className="auth-preview-card">
+            <Box className="auth-preview-header">
+              <Box>
+                <Typography className="auth-preview-title">Synthèse atelier</Typography>
+                <Typography className="auth-preview-subtitle">Ordres, Kanban et buffers DDMRP</Typography>
+              </Box>
+              <Box className="auth-preview-icon">
+                <AnalyticsIcon sx={{ fontSize: 22 }} />
+              </Box>
+            </Box>
 
-        <Stack direction="row" spacing={1} flexWrap="wrap">
-          <Chip icon={<VerifiedUserIcon />} label="Session sécurisée" color="primary" variant="outlined" />
-          <Chip label="KPIs temps réel" color="secondary" variant="outlined" />
-          <Chip label="Pilotage industriel" color="secondary" variant="outlined" />
-        </Stack>
+            <Box className="auth-preview-grid">
+              {kpiPreview.map((item) => (
+                <Box key={item.label} className={`auth-mini-kpi auth-mini-kpi--${item.tone}`}>
+                  <Typography className="auth-mini-kpi-label">{item.label}</Typography>
+                  <Typography className="auth-mini-kpi-value">{item.value}</Typography>
+                </Box>
+              ))}
+            </Box>
+
+            <Box className="auth-flow-line" aria-hidden="true">
+              <span />
+              <span />
+              <span />
+            </Box>
+          </Box>
+
+          <Stack className="auth-value-list" spacing={1.25}>
+            {valuePoints.map((point) => (
+              <Box key={point} className="auth-value-item">
+                <CheckCircleIcon sx={{ fontSize: 18 }} />
+                <Typography>{point}</Typography>
+              </Box>
+            ))}
+          </Stack>
+        </Box>
       </Box>
 
-      <Card className="panel page-entrance" sx={{ maxWidth: 520, ml: { md: 'auto' } }}>
-        <CardContent sx={{ p: { xs: 4, md: 5 } }}>
-          <Typography variant="h4" fontWeight={700} sx={{ mb: 1 }}>
-            Connexion
-          </Typography>
-          <Typography variant="body2" color="text.secondary" sx={{ mb: 3 }}>
-            Connectez-vous pour accéder au tableau de bord
-          </Typography>
-
-          <Divider sx={{ mb: 3 }} />
-
-          {successMessage && (
-            <Alert severity="success" sx={{ mb: 3 }}>
-              {successMessage}
-            </Alert>
-          )}
-
-          {error && (
-            <Alert severity="error" sx={{ mb: 3 }}>
-              {error}
-            </Alert>
-          )}
-
-          <Box component="form" onSubmit={handleSubmit}>
-            <TextField
-              fullWidth
-              label="Adresse email"
-              type="email"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              margin="normal"
-              required
-              InputProps={{
-                startAdornment: (
-                  <InputAdornment position="start">
-                    <EmailIcon color="action" />
-                  </InputAdornment>
-                ),
-              }}
-            />
-
-            <TextField
-              fullWidth
-              label="Mot de passe"
-              type={showPassword ? 'text' : 'password'}
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              margin="normal"
-              required
-              InputProps={{
-                startAdornment: (
-                  <InputAdornment position="start">
-                    <LockIcon color="action" />
-                  </InputAdornment>
-                ),
-                endAdornment: (
-                  <InputAdornment position="end">
-                    <IconButton onClick={() => setShowPassword(!showPassword)}>
-                      {showPassword ? <VisibilityOff /> : <Visibility />}
-                    </IconButton>
-                  </InputAdornment>
-                ),
-              }}
-            />
-
-            <Button
-              type="submit"
-              fullWidth
-              variant="contained"
-              size="large"
-              disabled={loading || !email || !password}
-              sx={{
-                mt: 4,
-                py: 2,
-                fontSize: '1.05rem',
-                fontWeight: 700,
-              }}
-            >
-              {loading ? 'Connexion...' : 'Se connecter'}
-            </Button>
-          </Box>
-
-          <Box sx={{ textAlign: 'center', mt: 4 }}>
-            <Typography variant="body2" color="text.secondary">
-              Pas de compte ?{' '}
-              <Button component={RouterLink} to="/register" color="primary" sx={{ fontWeight: 600 }}>
-                S'inscrire
-              </Button>
+      <Box className="auth-form-zone">
+        <Card className="auth-card page-entrance">
+          <CardContent>
+            <Typography className="auth-form-eyebrow">Accès sécurisé</Typography>
+            <Typography variant="h4" fontWeight={800} sx={{ mb: 1 }}>
+              Connexion
             </Typography>
-          </Box>
-        </CardContent>
-      </Card>
+            <Typography variant="body2" color="text.secondary" sx={{ mb: 4 }}>
+              Accédez à votre tableau de bord industriel.
+            </Typography>
+
+            {successMessage && (
+              <Alert severity="success" sx={{ mb: 3 }}>
+                {successMessage}
+              </Alert>
+            )}
+
+            {error && (
+              <Alert severity="error" sx={{ mb: 3 }}>
+                {error}
+              </Alert>
+            )}
+
+            <Stack component="form" spacing={2.5} onSubmit={handleSubmit}>
+              <TextField
+                fullWidth
+                label="Adresse email"
+                type="email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                required
+                InputProps={{
+                  startAdornment: (
+                    <InputAdornment position="start">
+                      <EmailIcon color="action" />
+                    </InputAdornment>
+                  ),
+                }}
+              />
+
+              <TextField
+                fullWidth
+                label="Mot de passe"
+                type={showPassword ? 'text' : 'password'}
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                required
+                InputProps={{
+                  startAdornment: (
+                    <InputAdornment position="start">
+                      <LockIcon color="action" />
+                    </InputAdornment>
+                  ),
+                  endAdornment: (
+                    <InputAdornment position="end">
+                      <IconButton onClick={() => setShowPassword(!showPassword)} aria-label="Afficher le mot de passe">
+                        {showPassword ? <VisibilityOff /> : <Visibility />}
+                      </IconButton>
+                    </InputAdornment>
+                  ),
+                }}
+              />
+
+              <Button
+                className="auth-submit-button"
+                type="submit"
+                fullWidth
+                variant="contained"
+                size="large"
+                disabled={loading || !email || !password}
+              >
+                {loading ? 'Connexion...' : 'Se connecter'}
+              </Button>
+            </Stack>
+
+            <Box className="auth-secondary-action">
+              <Typography variant="body2">Pas de compte ?</Typography>
+              <Button component={RouterLink} to="/register" color="primary" size="small" sx={{ fontWeight: 700 }}>
+                Créer un compte
+              </Button>
+            </Box>
+          </CardContent>
+        </Card>
+      </Box>
     </Box>
   );
 }

@@ -89,19 +89,19 @@ Elle utilise des buffers stratégiques afin de protéger le flux, absorber la va
 
 ### Tableau de bord
 
-![Tableau de bord](./docs/dashboard-v2.png)
+![Tableau de bord](https://raw.githubusercontent.com/yassinecontactwork-maker/lean-manufacturing-control-suite/main/docs/dashboard-v2.png)
 
 ### Gestion des ordres de fabrication
 
-![Ordres de fabrication](./docs/ordres-fabrication-v2.png)
+![Ordres de fabrication](https://raw.githubusercontent.com/yassinecontactwork-maker/lean-manufacturing-control-suite/main/docs/ordres-fabrication-v2.png)
 
 ### Buffers DDMRP
 
-![Buffers DDMRP](./docs/buffers-ddmrp-v2.png)
+![Buffers DDMRP](https://raw.githubusercontent.com/yassinecontactwork-maker/lean-manufacturing-control-suite/main/docs/buffers-ddmrp-v2.png)
 
 ### Alertes et conflits
 
-![Alertes et conflits](./docs/alertes-v2.png)
+![Alertes et conflits](https://raw.githubusercontent.com/yassinecontactwork-maker/lean-manufacturing-control-suite/main/docs/alertes-v2.png)
 
 ## Architecture du projet
 

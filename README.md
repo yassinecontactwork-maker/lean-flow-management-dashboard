@@ -2,8 +2,7 @@
 
 Le rapport technique complet est disponible ici :
 
-[Télécharger le rapport PDF](./LeanFlowSystem.pdf?raw=1)
-# Lean Manufacturing Industrial Control Suite
+[Télécharger le rapport PDF](https://github.com/yassinecontactwork-maker/lean-flow-management-dashboard/raw/refs/heads/main/LeanFlowSystem.pdf)
 
 Application web de supervision industrielle dédiée au pilotage des flux de production à travers les méthodes **KANBAN**, **CONWIP** et **DDMRP**.
 

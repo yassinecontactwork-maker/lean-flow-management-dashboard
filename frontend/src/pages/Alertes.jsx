@@ -28,8 +28,11 @@ import {
 import { alertesAPI } from '../services/api';
 import PageHeader from '../components/PageHeader';
 import KpiCard from '../components/KpiCard';
+import { useSearch } from '../context/SearchContext';
+import { matchesSearch } from '../utils/search';
 
 function Alertes() {
+  const { searchQuery } = useSearch();
   const [alertes, setAlertes] = useState([]);
   const [loading, setLoading] = useState(true);
   const [alert, setAlert] = useState(null);
@@ -135,11 +138,26 @@ function Alertes() {
     return labels[value] || String(value || '').replaceAll('_', ' ');
   };
 
+  const filteredAlertes = alertes.filter((alerte) =>
+    matchesSearch(alerte, searchQuery, [
+      'message',
+      'type_alerte',
+      'severite',
+      'statut',
+      (item) => item.article_detail?.sku,
+      (item) => item.article_detail?.designation,
+      (item) => item.poste_detail?.nom,
+      (item) => formatAlerteLabel(item.type_alerte),
+      (item) => formatAlerteLabel(item.severite),
+      (item) => formatAlerteLabel(item.statut),
+    ]),
+  );
+
   return (
     <Box className="page-shell">
       <PageHeader
-        title="Alertes système"
-        subtitle="Suivi des alertes actives, résolues et ignorées en temps réel."
+        title="Alertes"
+        subtitle="Alertes actives, résolues et ignorées."
         actions={
           <Box sx={{ display: 'flex', gap: 2, flexWrap: 'wrap' }}>
             <Button variant="contained" startIcon={<AutoAwesomeIcon />} onClick={handleGenererAutomatiques}>
@@ -186,7 +204,7 @@ function Alertes() {
               </TableRow>
             </TableHead>
             <TableBody>
-              {alertes.map((alerte) => (
+              {filteredAlertes.map((alerte) => (
                 <TableRow key={alerte.id}>
                   <TableCell>
                     <Chip label={formatAlerteLabel(alerte.type_alerte)} size="medium" sx={{ fontWeight: 600 }} />

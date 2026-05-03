@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import {
   Box,
@@ -18,9 +18,13 @@ import {
   Chip,
   Stack,
   Tooltip,
+  TextField,
+  InputAdornment,
+  useMediaQuery,
 } from '@mui/material';
 import {
   Menu as MenuIcon,
+  Search as SearchIcon,
   Dashboard as DashboardIcon,
   Inventory as InventoryIcon,
   PrecisionManufacturing as PrecisionManufacturingIcon,
@@ -42,18 +46,29 @@ import {
   LightMode as LightModeIcon,
 } from '@mui/icons-material';
 import { authAPI } from '../services/api';
+import { useSearch } from '../context/SearchContext';
 
 const drawerWidth = 272;
+const collapsedDrawerWidth = 76;
 
 function Layout({ children, mode = 'light', onToggleMode }) {
   const [mobileOpen, setMobileOpen] = useState(false);
+  const [desktopCollapsed, setDesktopCollapsed] = useState(false);
   const [openKanban, setOpenKanban] = useState(true);
   const [openConwip, setOpenConwip] = useState(true);
   const [openDDMRP, setOpenDDMRP] = useState(true);
 
   const navigate = useNavigate();
   const location = useLocation();
+  const isMobile = useMediaQuery('(max-width:899px)');
+  const { searchQuery, setSearchQuery } = useSearch();
   const isDark = mode === 'dark';
+  const effectiveDrawerWidth = desktopCollapsed ? collapsedDrawerWidth : drawerWidth;
+  const sidebarCollapsed = desktopCollapsed && !isMobile;
+
+  useEffect(() => {
+    setSearchQuery('');
+  }, [location.pathname, setSearchQuery]);
 
   const savedUser = localStorage.getItem('authUser');
   const user = savedUser
@@ -70,7 +85,13 @@ function Layout({ children, mode = 'light', onToggleMode }) {
   const roleLabel = roleLabels[roleKey] || roleKey.replace('_', ' ');
   const displayName = `${user.prenom || ''} ${user.nom || ''}`.trim() || 'Utilisateur';
 
-  const handleDrawerToggle = () => setMobileOpen(!mobileOpen);
+  const handleDrawerToggle = () => {
+    if (isMobile) {
+      setMobileOpen((prev) => !prev);
+      return;
+    }
+    setDesktopCollapsed((prev) => !prev);
+  };
 
   const handleToggle = (key) => {
     if (key === 'kanban') setOpenKanban(!openKanban);
@@ -90,7 +111,7 @@ function Layout({ children, mode = 'light', onToggleMode }) {
   };
 
   const menuItems = [
-    { header: 'PILOTAGE', roles: ['ADMIN', 'SUPPLY_CHAIN_MANAGER', 'RESP_PROD'] },
+    { header: 'CORE', roles: ['ADMIN', 'SUPPLY_CHAIN_MANAGER', 'RESP_PROD'] },
     { text: 'Tableau de bord', icon: <DashboardIcon />, path: '/', roles: ['ADMIN', 'RESP_PROD', 'SUPPLY_CHAIN_MANAGER'] },
     { text: 'Articles', icon: <InventoryIcon />, path: '/articles', roles: ['ADMIN', 'SUPPLY_CHAIN_MANAGER'] },
     { text: 'Postes de travail', icon: <PrecisionManufacturingIcon />, path: '/postes-travail', roles: ['ADMIN', 'RESP_PROD'] },
@@ -113,31 +134,31 @@ function Layout({ children, mode = 'light', onToggleMode }) {
     { text: 'Recommandations', icon: <LightbulbIcon />, path: '/ddmrp/recommandations', parent: 'ddmrp', roles: ['ADMIN', 'SUPPLY_CHAIN_MANAGER'] },
 
     { divider: true },
-    { header: 'RISQUES & ARBITRAGES', roles: ['ADMIN', 'RESP_PROD', 'SUPPLY_CHAIN_MANAGER'] },
+    { header: 'ALERTES & CONFLITS', roles: ['ADMIN', 'RESP_PROD', 'SUPPLY_CHAIN_MANAGER'] },
     { text: 'Alertes', icon: <WarningIcon />, path: '/alertes', roles: ['ADMIN', 'RESP_PROD', 'SUPPLY_CHAIN_MANAGER'] },
     { text: 'Conflits', icon: <ReportIcon />, path: '/conflits', roles: ['ADMIN', 'SUPPLY_CHAIN_MANAGER'] },
   ];
 
   const currentTitle = menuItems.find((item) => item.path === location.pathname)?.text || 'Lean Manufacturing';
-  const sidebarBg = isDark ? '#0F172A' : '#FFFFFF';
-  const sidebarText = isDark ? '#E5E7EB' : '#111827';
-  const sidebarMuted = isDark ? '#94A3B8' : '#64748B';
-  const sidebarSubtle = isDark ? '#1E293B' : '#F8FAFC';
-  const sidebarBorder = isDark ? 'rgba(148, 163, 184, 0.18)' : '#E2E8F0';
-  const sidebarActiveBg = isDark ? '#1E3A8A' : '#EAF2FF';
-  const sidebarActiveText = isDark ? '#FFFFFF' : '#2563EB';
-  const sidebarHoverBg = isDark ? '#1E293B' : '#F1F5F9';
-  const sidebarInactiveText = isDark ? '#CBD5E1' : '#475569';
-  const drawerBackground = isDark
-    ? 'linear-gradient(180deg, #0F172A 0%, #111827 100%)'
-    : 'linear-gradient(180deg, #FFFFFF 0%, #F8FAFC 100%)';
+  const sidebarBg = '#0F172A';
+  const sidebarText = '#E5E7EB';
+  const sidebarMuted = '#94A3B8';
+  const sidebarSubtle = '#111827';
+  const sidebarBorder = 'rgba(148, 163, 184, 0.18)';
+  const sidebarActiveBg = '#1E3A8A';
+  const sidebarActiveText = '#FFFFFF';
+  const sidebarHoverBg = '#1E293B';
+  const sidebarInactiveText = '#CBD5E1';
+  const drawerBackground = 'linear-gradient(180deg, #0F172A 0%, #111827 100%)';
   const drawerPaperSx = {
-    width: drawerWidth,
+    width: { xs: drawerWidth, md: effectiveDrawerWidth },
     backgroundColor: sidebarBg,
     backgroundImage: drawerBackground,
     borderRight: `1px solid ${sidebarBorder}`,
     color: sidebarText,
-    boxShadow: isDark ? '12px 0 36px rgba(0, 0, 0, 0.26)' : '12px 0 36px rgba(37, 99, 235, 0.06)',
+    overflowX: 'hidden',
+    transition: 'width 0.22s ease',
+    boxShadow: '12px 0 36px rgba(0, 0, 0, 0.18)',
   };
 
   const drawer = (
@@ -150,8 +171,8 @@ function Layout({ children, mode = 'light', onToggleMode }) {
         backgroundImage: drawerBackground,
       }}
     >
-      <Toolbar sx={{ px: 2.5, py: 2.5, minHeight: 84 }}>
-        <Stack direction="row" spacing={2} alignItems="center">
+      <Toolbar sx={{ px: sidebarCollapsed ? 1.5 : 2.5, py: 2.5, minHeight: 84, justifyContent: sidebarCollapsed ? 'center' : 'flex-start' }}>
+        <Stack direction="row" spacing={sidebarCollapsed ? 0 : 2} alignItems="center">
           <Box
             sx={{
               width: 44,
@@ -160,13 +181,13 @@ function Layout({ children, mode = 'light', onToggleMode }) {
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',
-              background: isDark ? 'rgba(37, 99, 235, 0.32)' : 'rgba(37, 99, 235, 0.1)',
+              background: 'rgba(37, 99, 235, 0.32)',
               border: '1px solid rgba(37, 99, 235, 0.18)',
             }}
           >
             <FactoryIcon sx={{ color: '#2563EB' }} />
           </Box>
-          <Box>
+          <Box sx={{ display: sidebarCollapsed ? 'none' : 'block' }}>
             <Typography variant="subtitle1" fontWeight={800} color={sidebarText} sx={{ fontSize: 17, lineHeight: 1.2 }}>
               Lean Manufacturing
             </Typography>
@@ -182,7 +203,7 @@ function Layout({ children, mode = 'light', onToggleMode }) {
       <List
         sx={{
           flexGrow: 1,
-          px: 1.5,
+          px: sidebarCollapsed ? 1 : 1.5,
           py: 2,
           overflowY: 'auto',
           '&::-webkit-scrollbar': { width: 6 },
@@ -190,13 +211,15 @@ function Layout({ children, mode = 'light', onToggleMode }) {
         }}
       >
         {menuItems.map((item, index) => {
-          if (item.divider) return <Divider key={index} sx={{ my: 2, borderColor: sidebarBorder }} />;
+          if (item.divider) return <Divider key={index} sx={{ my: sidebarCollapsed ? 1 : 2, borderColor: sidebarBorder }} />;
 
           if (item.header) {
             const visible = !item.roles || item.roles.includes(user.role);
             if (!visible) return null;
 
             if (item.expandable) {
+              if (sidebarCollapsed) return null;
+
               const isOpen =
                 (item.key === 'kanban' && openKanban) ||
                 (item.key === 'conwip' && openConwip) ||
@@ -222,7 +245,7 @@ function Layout({ children, mode = 'light', onToggleMode }) {
             }
 
             return (
-              <ListItem key={index} disablePadding sx={{ my: 1 }}>
+              <ListItem key={index} disablePadding sx={{ my: 1, display: sidebarCollapsed ? 'none' : 'flex' }}>
                 <ListItemText
                   primary={item.header}
                   primaryTypographyProps={{
@@ -243,6 +266,7 @@ function Layout({ children, mode = 'light', onToggleMode }) {
           const isActive = location.pathname === item.path;
           const visible =
             !item.parent ||
+            sidebarCollapsed ||
             (item.parent === 'kanban' && openKanban) ||
             (item.parent === 'conwip' && openConwip) ||
             (item.parent === 'ddmrp' && openDDMRP);
@@ -262,14 +286,16 @@ function Layout({ children, mode = 'light', onToggleMode }) {
                     position: 'relative',
                     overflow: 'hidden',
                     borderRadius: 2.5,
-                    pl: item.parent ? 4.5 : 2.5,
+                    justifyContent: sidebarCollapsed ? 'center' : 'flex-start',
+                    px: sidebarCollapsed ? 1 : undefined,
+                    pl: sidebarCollapsed ? 1 : item.parent ? 4.5 : 2.5,
                     py: 1.15,
                     color: isActive ? sidebarActiveText : sidebarInactiveText,
                     '&.Mui-selected': {
                       bgcolor: sidebarActiveBg,
                       color: sidebarActiveText,
                       '& .MuiListItemIcon-root': { color: sidebarActiveText },
-                      boxShadow: isDark ? '0 10px 24px rgba(30, 58, 138, 0.26)' : 'none',
+                      boxShadow: '0 10px 24px rgba(30, 58, 138, 0.26)',
                     },
                     '&:hover': { bgcolor: isActive ? sidebarActiveBg : sidebarHoverBg, color: isActive ? sidebarActiveText : '#2563EB' },
                     '&::before': {
@@ -291,11 +317,18 @@ function Layout({ children, mode = 'light', onToggleMode }) {
                     },
                   }}
                 >
-                  <ListItemIcon sx={{ minWidth: 42, color: isActive ? sidebarActiveText : sidebarMuted }}>
+                  <ListItemIcon
+                    sx={{
+                      minWidth: sidebarCollapsed ? 0 : 42,
+                      color: isActive ? sidebarActiveText : sidebarMuted,
+                      justifyContent: 'center',
+                    }}
+                  >
                     {item.icon}
                   </ListItemIcon>
                   <ListItemText
                     primary={item.text}
+                    sx={{ display: sidebarCollapsed ? 'none' : 'block' }}
                     primaryTypographyProps={{ fontWeight: isActive ? 700 : 600, fontSize: 15.5 }}
                   />
                 </ListItemButton>
@@ -305,11 +338,11 @@ function Layout({ children, mode = 'light', onToggleMode }) {
         })}
       </List>
 
-      <Box sx={{ p: 1.5 }}>
+      <Box sx={{ p: sidebarCollapsed ? 1 : 1.5 }}>
         <Divider sx={{ mb: 2, borderColor: sidebarBorder }} />
         <Stack
           direction="row"
-          spacing={1.5}
+          spacing={sidebarCollapsed ? 0 : 1.5}
           alignItems="center"
           sx={{
             mb: 1.5,
@@ -317,12 +350,13 @@ function Layout({ children, mode = 'light', onToggleMode }) {
             borderRadius: 2.5,
             bgcolor: sidebarSubtle,
             border: `1px solid ${sidebarBorder}`,
+            justifyContent: sidebarCollapsed ? 'center' : 'flex-start',
           }}
         >
           <Avatar sx={{ bgcolor: '#2563EB' }}>
             <PersonIcon />
           </Avatar>
-          <Box>
+          <Box sx={{ display: sidebarCollapsed ? 'none' : 'block' }}>
             <Typography fontWeight={700} noWrap color={sidebarText} sx={{ maxWidth: 158 }}>
               {displayName}
             </Typography>
@@ -343,10 +377,10 @@ function Layout({ children, mode = 'light', onToggleMode }) {
             onClick={handleLogout}
             sx={{ borderRadius: 2.5, py: 1.2, color: sidebarMuted, '&:hover': { bgcolor: 'rgba(220, 38, 38, 0.08)', color: '#DC2626' } }}
           >
-            <ListItemIcon sx={{ minWidth: 42, color: '#DC2626' }}>
+            <ListItemIcon sx={{ minWidth: sidebarCollapsed ? 0 : 42, color: '#DC2626', justifyContent: 'center' }}>
               <LogoutIcon />
             </ListItemIcon>
-            <ListItemText primary="Déconnexion" primaryTypographyProps={{ fontWeight: 700 }} />
+            <ListItemText primary="Déconnexion" sx={{ display: sidebarCollapsed ? 'none' : 'block' }} primaryTypographyProps={{ fontWeight: 700 }} />
           </ListItemButton>
         </ListItem>
       </Box>
@@ -358,8 +392,8 @@ function Layout({ children, mode = 'light', onToggleMode }) {
       <AppBar
         position="fixed"
         sx={{
-          width: { sm: `calc(100% - ${drawerWidth}px)` },
-          ml: { sm: `${drawerWidth}px` },
+          width: { md: `calc(100% - ${effectiveDrawerWidth}px)` },
+          ml: { md: `${effectiveDrawerWidth}px` },
           bgcolor: isDark ? 'rgba(15, 23, 42, 0.94)' : 'rgba(255, 255, 255, 0.78)',
           color: isDark ? '#E5E7EB' : '#111827',
           boxShadow: isDark ? '0 14px 30px rgba(0, 0, 0, 0.24)' : '0 8px 20px rgba(15, 23, 42, 0.06)',
@@ -369,23 +403,38 @@ function Layout({ children, mode = 'light', onToggleMode }) {
         }}
       >
         <Toolbar sx={{ display: 'flex', justifyContent: 'space-between', gap: 2, minHeight: 64 }}>
-          <Stack direction="row" spacing={2} alignItems="center">
+          <Stack direction="row" spacing={2} alignItems="center" sx={{ minWidth: 0, flex: 1 }}>
             <IconButton
               color="inherit"
               edge="start"
               onClick={handleDrawerToggle}
-              sx={{ display: { sm: 'none' } }}
+              aria-label={isMobile ? 'Ouvrir la navigation' : desktopCollapsed ? 'Déployer la navigation' : 'Réduire la navigation'}
             >
               <MenuIcon />
             </IconButton>
-            <Box>
+            <Box sx={{ minWidth: 0, display: { xs: 'none', sm: 'block', md: desktopCollapsed ? 'none' : 'block' } }}>
               <Typography variant="h6" noWrap fontWeight={700} sx={{ letterSpacing: 0, fontSize: 19 }}>
                 {currentTitle}
               </Typography>
-              <Typography variant="caption" color="text.secondary" sx={{ fontSize: 13 }}>
+              <Typography variant="caption" color="text.secondary" sx={{ display: { xs: 'none', lg: 'block' }, fontSize: 13 }}>
                 Supervision temps réel et décisions terrain
               </Typography>
             </Box>
+            <TextField
+              className="topbar-search"
+              size="small"
+              placeholder="Rechercher..."
+              value={searchQuery}
+              onChange={(event) => setSearchQuery(event.target.value)}
+              sx={{ display: 'block', width: { xs: '42vw', sm: 260, md: 340, lg: 420 }, ml: { md: 1 } }}
+              InputProps={{
+                startAdornment: (
+                  <InputAdornment position="start">
+                    <SearchIcon fontSize="small" />
+                  </InputAdornment>
+                ),
+              }}
+            />
           </Stack>
           <Stack direction="row" spacing={1.5} alignItems="center">
             <Chip
@@ -393,7 +442,7 @@ function Layout({ children, mode = 'light', onToggleMode }) {
               color="success"
               size="small"
               variant={isDark ? 'filled' : 'outlined'}
-              sx={{ fontWeight: 600 }}
+              sx={{ display: { xs: 'none', sm: 'inline-flex' }, fontWeight: 600 }}
             />
             <Tooltip title={isDark ? 'Mode clair' : 'Mode sombre'}>
               <IconButton
@@ -422,20 +471,20 @@ function Layout({ children, mode = 'light', onToggleMode }) {
         </Toolbar>
       </AppBar>
 
-      <Box component="nav" sx={{ width: { sm: drawerWidth }, flexShrink: { sm: 0 } }}>
+      <Box component="nav" sx={{ width: { md: effectiveDrawerWidth }, flexShrink: { md: 0 }, transition: 'width 0.22s ease' }}>
         <Drawer
           variant="temporary"
           open={mobileOpen}
           onClose={handleDrawerToggle}
           ModalProps={{ keepMounted: true }}
-          sx={{ display: { xs: 'block', sm: 'none' }, '& .MuiDrawer-paper': drawerPaperSx }}
+          sx={{ display: { xs: 'block', md: 'none' }, '& .MuiDrawer-paper': drawerPaperSx }}
         >
           {drawer}
         </Drawer>
         <Drawer
           variant="permanent"
           open
-          sx={{ display: { xs: 'none', sm: 'block' }, '& .MuiDrawer-paper': drawerPaperSx }}
+          sx={{ display: { xs: 'none', md: 'block' }, '& .MuiDrawer-paper': drawerPaperSx }}
         >
           {drawer}
         </Drawer>

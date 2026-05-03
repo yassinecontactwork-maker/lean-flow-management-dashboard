@@ -33,8 +33,11 @@ import {
 } from '@mui/icons-material';
 import { buffersDDMRPAPI, articlesAPI, postesTravailAPI } from '../services/api';
 import PageHeader from '../components/PageHeader';
+import { useSearch } from '../context/SearchContext';
+import { matchesSearch } from '../utils/search';
 
 function BuffersDDMRP() {
+  const { searchQuery } = useSearch();
   const [buffers, setBuffers] = useState([]);
   const [articles, setArticles] = useState([]);
   const [postes, setPostes] = useState([]);
@@ -191,6 +194,20 @@ function BuffersDDMRP() {
     return 'success';
   };
 
+  const filteredBuffers = buffers.filter((buffer) =>
+    matchesSearch(buffer, searchQuery, [
+      'niveau_actuel',
+      'stock_disponible',
+      'zone_rouge',
+      'zone_jaune',
+      'zone_verte',
+      (item) => item.article_detail?.sku,
+      (item) => item.article_detail?.designation,
+      (item) => item.poste_detail?.nom,
+      (item) => (item.actif ? 'Actif Oui' : 'Inactif Non'),
+    ]),
+  );
+
   return (
     <Box className="page-shell">
       <PageHeader
@@ -238,7 +255,7 @@ function BuffersDDMRP() {
               </TableRow>
             </TableHead>
             <TableBody>
-              {buffers.map((buffer) => (
+              {filteredBuffers.map((buffer) => (
                 <TableRow key={buffer.id}>
                   <TableCell>
                     <Typography variant="body1" fontWeight="600">

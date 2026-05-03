@@ -29,8 +29,11 @@ import {
 } from '@mui/icons-material';
 import { lignesProductionAPI } from '../services/api';
 import PageHeader from '../components/PageHeader';
+import { useSearch } from '../context/SearchContext';
+import { matchesSearch } from '../utils/search';
 
 function LignesProduction() {
+  const { searchQuery } = useSearch();
   const [lignes, setLignes] = useState([]);
   const [loading, setLoading] = useState(true);
   const [alert, setAlert] = useState(null);
@@ -88,11 +91,24 @@ function LignesProduction() {
     }
   };
 
+  const filteredLignes = lignes.filter((ligne) =>
+    matchesSearch(ligne, searchQuery, [
+      'nom',
+      'description',
+      'wip_actuel',
+      'wip_critique',
+      (item) => (item.active ? 'Active' : 'Inactive'),
+      (item) => (item.est_saturee ? 'Saturée' : ''),
+      (item) => item.goulet?.nom,
+      (item) => item.sequence?.map((seq) => seq.poste_detail?.nom).join(' '),
+    ]),
+  );
+
   return (
     <Box className="page-shell">
       <PageHeader
-        title="Lignes de Production CONWIP"
-        subtitle="Pilotage des flux, WIP critique et séquence des postes." 
+        title="Lignes de production"
+        subtitle="WIP critique et séquence des postes CONWIP."
         actions={
           <Button variant="outlined" startIcon={<RefreshIcon />} onClick={loadLignes}>
             Actualiser
@@ -113,7 +129,7 @@ function LignesProduction() {
       {loading && <LinearProgress />}
 
       <Grid container spacing={3}>
-        {lignes.map((ligne) => (
+        {filteredLignes.map((ligne) => (
           <Grid item xs={12} lg={6} key={ligne.id}>
             <Card className="panel" sx={{ height: '100%' }}>
               <CardContent sx={{ p: 4 }}>

@@ -36,8 +36,11 @@ import {
 import { postesTravailAPI } from '../services/api';
 import PageHeader from '../components/PageHeader';
 import KpiCard from '../components/KpiCard';
+import { useSearch } from '../context/SearchContext';
+import { matchesSearch } from '../utils/search';
 
 function PostesTravail() {
+  const { searchQuery } = useSearch();
   const [postes, setPostes] = useState([]);
   const [loading, setLoading] = useState(true);
   const [openDialog, setOpenDialog] = useState(false);
@@ -130,12 +133,19 @@ function PostesTravail() {
   };
 
   const goulets = postes.filter(p => p.est_goulet);
+  const filteredPostes = postes.filter((poste) =>
+    matchesSearch(poste, searchQuery, [
+      'nom',
+      'capacite_horaire',
+      (item) => (item.est_goulet ? 'GOULET' : 'Normal'),
+    ]),
+  );
 
   return (
     <Box className="page-shell">
       <PageHeader
-        title="Postes de Travail"
-        subtitle="Capacités, goulets et supervision des ressources de production."
+        title="Postes de travail"
+        subtitle="Capacités, goulets et ressources de production."
         actions={
           <Button
             variant="outlined"
@@ -197,7 +207,7 @@ function PostesTravail() {
               </TableRow>
             </TableHead>
             <TableBody>
-              {postes.map((poste) => (
+              {filteredPostes.map((poste) => (
                 <TableRow key={poste.id}>
                   <TableCell>
                     <Typography variant="body1" fontWeight="600" color={poste.est_goulet ? 'error.main' : 'inherit'}>

@@ -35,8 +35,11 @@ import {
 import { articlesAPI } from '../services/api';
 import PageHeader from '../components/PageHeader';
 import KpiCard from '../components/KpiCard';
+import { useSearch } from '../context/SearchContext';
+import { matchesSearch } from '../utils/search';
 
 function Articles() {
+  const { searchQuery } = useSearch();
   const [articles, setArticles] = useState([]);
   const [loading, setLoading] = useState(true);
   const [openDialog, setOpenDialog] = useState(false);
@@ -164,10 +167,20 @@ function Articles() {
       .toFixed(2),
   };
 
+  const filteredArticles = articles.filter((article) =>
+    matchesSearch(article, searchQuery, [
+      'sku',
+      'designation',
+      'stock_physique',
+      'stock_securite',
+      (item) => getStockStatus(item).label,
+    ]),
+  );
+
   return (
     <Box className="page-shell">
       <PageHeader
-        title="Gestion des Articles"
+        title="Articles"
         subtitle="Catalogue, niveaux de stock et valorisation des composants."
         actions={
           <Button
@@ -229,7 +242,7 @@ function Articles() {
               </TableRow>
             </TableHead>
             <TableBody>
-              {articles.map((article) => {
+              {filteredArticles.map((article) => {
                 const status = getStockStatus(article);
                 return (
                   <TableRow key={article.id}>

@@ -25,8 +25,11 @@ import {
 import { ticketsConwipAPI } from '../services/api';
 import PageHeader from '../components/PageHeader';
 import KpiCard from '../components/KpiCard';
+import { useSearch } from '../context/SearchContext';
+import { matchesSearch } from '../utils/search';
 
 function TicketsConwip() {
+  const { searchQuery } = useSearch();
   const [tickets, setTickets] = useState([]);
   const [loading, setLoading] = useState(true);
   const [alert, setAlert] = useState(null);
@@ -72,6 +75,17 @@ function TicketsConwip() {
     }
   };
 
+  const filteredTickets = tickets.filter((ticket) =>
+    matchesSearch(ticket, searchQuery, [
+      'numero',
+      'statut',
+      (item) => item.ligne_detail?.nom,
+      (item) => item.ordre_fabrication_detail?.numero,
+      (item) => item.poste_actuel_detail?.nom,
+      (item) => getStatutConfig(item.statut).label,
+    ]),
+  );
+
   return (
     <Box className="page-shell">
       <PageHeader
@@ -113,14 +127,14 @@ function TicketsConwip() {
               </TableRow>
             </TableHead>
             <TableBody>
-              {tickets.length === 0 && !loading ? (
+              {filteredTickets.length === 0 && !loading ? (
                 <TableRow>
                   <TableCell colSpan={6} align="center" sx={{ py: 6, color: 'text.secondary' }}>
                     <Typography variant="h6">Aucun ticket CONWIP pour le moment</Typography>
                   </TableCell>
                 </TableRow>
               ) : (
-                tickets.map((ticket) => {
+                filteredTickets.map((ticket) => {
                   const config = getStatutConfig(ticket.statut);
                   return (
                     <TableRow key={ticket.id}>

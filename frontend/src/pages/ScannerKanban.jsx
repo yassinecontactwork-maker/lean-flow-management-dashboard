@@ -24,8 +24,11 @@ import {
 } from '@mui/icons-material';
 import { cartesKanbanAPI } from '../services/api';
 import PageHeader from '../components/PageHeader';
+import { useSearch } from '../context/SearchContext';
+import { matchesSearch } from '../utils/search';
 
 function ScannerKanban() {
+  const { searchQuery } = useSearch();
   const [scanning, setScanning] = useState(false);
   const [manualCode, setManualCode] = useState('');
   const [result, setResult] = useState(null);
@@ -88,6 +91,10 @@ function ScannerKanban() {
     }
     setScanning(true);
   };
+
+  const filteredScanHistory = scanHistory.filter((scan) =>
+    matchesSearch(scan, searchQuery, ['code', 'statut', 'message']),
+  );
 
   return (
     <Box className="page-shell">
@@ -261,7 +268,7 @@ function ScannerKanban() {
                 </Typography>
               ) : (
                 <List>
-                  {scanHistory.map((scan, index) => (
+                  {filteredScanHistory.map((scan, index) => (
                     <ListItem
                       key={index}
                       divider={index < scanHistory.length - 1}

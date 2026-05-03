@@ -32,8 +32,11 @@ import {
 import { cartesKanbanAPI } from '../services/api';
 import PageHeader from '../components/PageHeader';
 import KpiCard from '../components/KpiCard';
+import { useSearch } from '../context/SearchContext';
+import { matchesSearch } from '../utils/search';
 
 function CartesKanban() {
+  const { searchQuery } = useSearch();
   const [cartes, setCartes] = useState([]);
   const [loading, setLoading] = useState(true);
   const [alert, setAlert] = useState(null);
@@ -80,6 +83,18 @@ function CartesKanban() {
     vides: cartes.filter(c => c.statut === 'VIDE').length,
   };
 
+  const filteredCartes = cartes.filter((carte) =>
+    matchesSearch(carte, searchQuery, [
+      'code_unique',
+      'statut',
+      'quantite',
+      (item) => item.flux_detail?.article_detail?.sku,
+      (item) => item.flux_detail?.article_detail?.designation,
+      (item) => item.flux_detail?.poste_fournisseur_detail?.nom,
+      (item) => item.flux_detail?.poste_consommateur_detail?.nom,
+    ]),
+  );
+
   return (
     <Box className="page-shell">
       <PageHeader
@@ -121,7 +136,7 @@ function CartesKanban() {
               </TableRow>
             </TableHead>
             <TableBody>
-              {cartes.map((carte) => (
+              {filteredCartes.map((carte) => (
                 <TableRow key={carte.id}>
                   <TableCell>
                     <Typography variant="body2" fontWeight="bold">

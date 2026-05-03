@@ -5,6 +5,7 @@ import CssBaseline from '@mui/material/CssBaseline';
 import { Box, CircularProgress, LinearProgress, Typography } from '@mui/material';
 import { authAPI } from './services/api';
 import Layout from './components/Layout';
+import { SearchProvider } from './context/SearchContext';
 
 const Login = lazy(() => import('./pages/Login'));
 const Register = lazy(() => import('./pages/Register'));
@@ -497,115 +498,117 @@ function App() {
               path="/*"
               element={
                 <PrivateRoute>
-                  <Layout mode={mode} onToggleMode={handleToggleMode}>
-                    <Routes>
-                      <Route
-                        path="/"
-                        element={
-                          <RoleRoute allowedRoles={['RESP_PROD', 'SUPPLY_CHAIN_MANAGER']}>
-                            <Dashboard />
-                          </RoleRoute>
-                        }
-                      />
-                      <Route
-                        path="/articles"
-                        element={
-                          <RoleRoute allowedRoles={['SUPPLY_CHAIN_MANAGER']}>
-                            <Articles />
-                          </RoleRoute>
-                        }
-                      />
-                      <Route
-                        path="/postes-travail"
-                        element={
-                          <RoleRoute allowedRoles={['RESP_PROD']}>
-                            <PostesTravail />
-                          </RoleRoute>
-                        }
-                      />
-                      <Route
-                        path="/ordres-fabrication"
-                        element={
-                          <RoleRoute>
-                            <OrdresFabrication />
-                          </RoleRoute>
-                        }
-                      />
-                      <Route
-                        path="/kanban/flux"
-                        element={
-                          <RoleRoute allowedRoles={['RESP_PROD']}>
-                            <ConfigFluxKanban />
-                          </RoleRoute>
-                        }
-                      />
-                      <Route
-                        path="/kanban/cartes"
-                        element={
-                          <RoleRoute allowedRoles={['RESP_PROD', 'OPERATEUR']}>
-                            <CartesKanban />
-                          </RoleRoute>
-                        }
-                      />
-                      <Route
-                        path="/kanban/scanner"
-                        element={
-                          <RoleRoute allowedRoles={['RESP_PROD', 'OPERATEUR']}>
-                            <ScannerKanban />
-                          </RoleRoute>
-                        }
-                      />
-                      <Route
-                        path="/conwip/lignes"
-                        element={
-                          <RoleRoute allowedRoles={['RESP_PROD']}>
-                            <LignesProduction />
-                          </RoleRoute>
-                        }
-                      />
-                      <Route
-                        path="/conwip/tickets"
-                        element={
-                          <RoleRoute allowedRoles={['RESP_PROD']}>
-                            <TicketsConwip />
-                          </RoleRoute>
-                        }
-                      />
-                      <Route
-                        path="/ddmrp/buffers"
-                        element={
-                          <RoleRoute allowedRoles={['SUPPLY_CHAIN_MANAGER']}>
-                            <BuffersDDMRP />
-                          </RoleRoute>
-                        }
-                      />
-                      <Route
-                        path="/ddmrp/recommandations"
-                        element={
-                          <RoleRoute allowedRoles={['SUPPLY_CHAIN_MANAGER']}>
-                            <Recommandations />
-                          </RoleRoute>
-                        }
-                      />
-                      <Route
-                        path="/alertes"
-                        element={
-                          <RoleRoute allowedRoles={['RESP_PROD', 'SUPPLY_CHAIN_MANAGER']}>
-                            <Alertes />
-                          </RoleRoute>
-                        }
-                      />
-                      <Route
-                        path="/conflits"
-                        element={
-                          <RoleRoute allowedRoles={['SUPPLY_CHAIN_MANAGER']}>
-                            <Conflits />
-                          </RoleRoute>
-                        }
-                      />
-                      <Route path="*" element={<RoleRedirect />} />
-                    </Routes>
-                  </Layout>
+                  <SearchProvider>
+                    <Layout mode={mode} onToggleMode={handleToggleMode}>
+                      <Routes>
+                        <Route
+                          path="/"
+                          element={
+                            <RoleRoute allowedRoles={['RESP_PROD', 'SUPPLY_CHAIN_MANAGER']}>
+                              <Dashboard />
+                            </RoleRoute>
+                          }
+                        />
+                        <Route
+                          path="/articles"
+                          element={
+                            <RoleRoute allowedRoles={['SUPPLY_CHAIN_MANAGER']}>
+                              <Articles />
+                            </RoleRoute>
+                          }
+                        />
+                        <Route
+                          path="/postes-travail"
+                          element={
+                            <RoleRoute allowedRoles={['RESP_PROD']}>
+                              <PostesTravail />
+                            </RoleRoute>
+                          }
+                        />
+                        <Route
+                          path="/ordres-fabrication"
+                          element={
+                            <RoleRoute>
+                              <OrdresFabrication />
+                            </RoleRoute>
+                          }
+                        />
+                        <Route
+                          path="/kanban/flux"
+                          element={
+                            <RoleRoute allowedRoles={['RESP_PROD']}>
+                              <ConfigFluxKanban />
+                            </RoleRoute>
+                          }
+                        />
+                        <Route
+                          path="/kanban/cartes"
+                          element={
+                            <RoleRoute allowedRoles={['RESP_PROD', 'OPERATEUR']}>
+                              <CartesKanban />
+                            </RoleRoute>
+                          }
+                        />
+                        <Route
+                          path="/kanban/scanner"
+                          element={
+                            <RoleRoute allowedRoles={['RESP_PROD', 'OPERATEUR']}>
+                              <ScannerKanban />
+                            </RoleRoute>
+                          }
+                        />
+                        <Route
+                          path="/conwip/lignes"
+                          element={
+                            <RoleRoute allowedRoles={['RESP_PROD']}>
+                              <LignesProduction />
+                            </RoleRoute>
+                          }
+                        />
+                        <Route
+                          path="/conwip/tickets"
+                          element={
+                            <RoleRoute allowedRoles={['RESP_PROD']}>
+                              <TicketsConwip />
+                            </RoleRoute>
+                          }
+                        />
+                        <Route
+                          path="/ddmrp/buffers"
+                          element={
+                            <RoleRoute allowedRoles={['SUPPLY_CHAIN_MANAGER']}>
+                              <BuffersDDMRP />
+                            </RoleRoute>
+                          }
+                        />
+                        <Route
+                          path="/ddmrp/recommandations"
+                          element={
+                            <RoleRoute allowedRoles={['SUPPLY_CHAIN_MANAGER']}>
+                              <Recommandations />
+                            </RoleRoute>
+                          }
+                        />
+                        <Route
+                          path="/alertes"
+                          element={
+                            <RoleRoute allowedRoles={['RESP_PROD', 'SUPPLY_CHAIN_MANAGER']}>
+                              <Alertes />
+                            </RoleRoute>
+                          }
+                        />
+                        <Route
+                          path="/conflits"
+                          element={
+                            <RoleRoute allowedRoles={['SUPPLY_CHAIN_MANAGER']}>
+                              <Conflits />
+                            </RoleRoute>
+                          }
+                        />
+                        <Route path="*" element={<RoleRedirect />} />
+                      </Routes>
+                    </Layout>
+                  </SearchProvider>
                 </PrivateRoute>
               }
             />

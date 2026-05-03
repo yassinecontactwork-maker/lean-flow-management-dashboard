@@ -38,8 +38,11 @@ import {
 import { ordresFabricationAPI, articlesAPI, postesTravailAPI } from '../services/api';
 import PageHeader from '../components/PageHeader';
 import KpiCard from '../components/KpiCard';
+import { useSearch } from '../context/SearchContext';
+import { matchesSearch } from '../utils/search';
 
 function OrdresFabrication() {
+  const { searchQuery } = useSearch();
   const [ordres, setOrdres] = useState([]);
   const [articles, setArticles] = useState([]);
   const [postes, setPostes] = useState([]);
@@ -184,12 +187,26 @@ function OrdresFabrication() {
     }
   };
 
-  const filteredOrdres = ordres.filter((ordre) => {
+  const tabFilteredOrdres = ordres.filter((ordre) => {
     if (tabValue === 0) return ordre.statut === 'EN_ATTENTE';
     if (tabValue === 1) return ordre.statut === 'EN_COURS';
     if (tabValue === 2) return ordre.statut === 'TERMINE';
     return true;
   });
+
+  const filteredOrdres = tabFilteredOrdres.filter((ordre) =>
+    matchesSearch(ordre, searchQuery, [
+      'numero',
+      'source',
+      'statut',
+      'priorite',
+      'quantite',
+      (item) => item.article_detail?.sku,
+      (item) => item.article_detail?.designation,
+      (item) => item.poste_detail?.nom,
+      (item) => getStatutLabel(item.statut),
+    ]),
+  );
 
   const stats = {
     enAttente: ordres.filter(o => o.statut === 'EN_ATTENTE').length,
@@ -200,8 +217,8 @@ function OrdresFabrication() {
   return (
     <Box className="page-shell">
       <PageHeader
-        title="Ordres de Fabrication"
-        subtitle="Planification, exécution et suivi des OF multi-sources."
+        title="Ordres de fabrication"
+        subtitle="Suivi des OF et de leur état d'avancement."
         actions={
           <Button
             variant="outlined"

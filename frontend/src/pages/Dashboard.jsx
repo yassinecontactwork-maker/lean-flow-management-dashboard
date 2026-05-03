@@ -16,8 +16,6 @@ import {
   Warning as WarningIcon,
   Report as ReportIcon,
   Refresh as RefreshIcon,
-  AccountTree as AccountTreeIcon,
-  TrendingUp as TrendingUpIcon,
 } from '@mui/icons-material';
 import { Chart as ChartJS, ArcElement, Tooltip, Legend, CategoryScale, LinearScale, BarElement, Title } from 'chart.js';
 import { Pie, Bar } from 'react-chartjs-2';
@@ -27,18 +25,11 @@ import {
   alertesAPI,
   conflitsAPI,
   buffersDDMRPAPI,
-  ticketsConwipAPI,
 } from '../services/api';
 import PageHeader from '../components/PageHeader';
 import KpiCard from '../components/KpiCard';
 
 ChartJS.register(ArcElement, Tooltip, Legend, CategoryScale, LinearScale, BarElement, Title);
-
-const normalizeList = (data) => {
-  if (Array.isArray(data)) return data;
-  if (Array.isArray(data?.results)) return data.results;
-  return [];
-};
 
 function Dashboard() {
   const [loading, setLoading] = useState(true);
@@ -48,7 +39,6 @@ function Dashboard() {
     alertes: null,
     conflits: null,
     buffers: null,
-    tickets: [],
   });
 
   useEffect(() => {
@@ -58,13 +48,12 @@ function Dashboard() {
   const loadStats = async () => {
     try {
       setLoading(true);
-      const [ordresRes, cartesRes, alertesRes, conflitsRes, buffersRes, ticketsRes] = await Promise.all([
+      const [ordresRes, cartesRes, alertesRes, conflitsRes, buffersRes] = await Promise.all([
         ordresFabricationAPI.statistiques(),
         cartesKanbanAPI.statistiques(),
         alertesAPI.statistiques(),
         conflitsAPI.statistiques(),
         buffersDDMRPAPI.statistiques(),
-        ticketsConwipAPI.getAll().catch(() => ({ data: [] })),
       ]);
 
       setStats({
@@ -73,7 +62,6 @@ function Dashboard() {
         alertes: alertesRes.data,
         conflits: conflitsRes.data,
         buffers: buffersRes.data,
-        tickets: normalizeList(ticketsRes.data),
       });
     } catch (error) {
       console.error('Erreur lors du chargement des statistiques:', error);
@@ -106,11 +94,6 @@ function Dashboard() {
       },
     ],
   };
-
-  const ticketsTotal = stats.tickets?.length || 0;
-  const ticketsEnCours = stats.tickets?.filter((ticket) => ticket.statut === 'EN_COURS').length || 0;
-  const buffersVert = stats.buffers?.par_niveau?.vert || 0;
-  const buffersTotal = Object.values(stats.buffers?.par_niveau || {}).reduce((total, value) => total + value, 0);
 
   const buffersChartData = {
     labels: ['Zone Rouge', 'Zone Jaune', 'Zone Verte'],
@@ -224,20 +207,6 @@ function Dashboard() {
           icon={<InventoryIcon />}
           tone="warning"
           foot={`${stats.cartes?.vides || 0} cartes vides`}
-        />
-        <KpiCard
-          label="Tickets CONWIP"
-          value={ticketsTotal}
-          icon={<AccountTreeIcon />}
-          tone="neutral"
-          foot={`${ticketsEnCours} en cours`}
-        />
-        <KpiCard
-          label="Buffers DDMRP"
-          value={buffersTotal}
-          icon={<TrendingUpIcon />}
-          tone="success"
-          foot={`${buffersVert} en zone verte`}
         />
         <KpiCard
           label="Alertes actives"

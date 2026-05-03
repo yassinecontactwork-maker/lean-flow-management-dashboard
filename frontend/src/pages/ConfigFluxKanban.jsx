@@ -33,8 +33,11 @@ import {
 } from '@mui/icons-material';
 import { configFluxKanbanAPI, articlesAPI, postesTravailAPI } from '../services/api';
 import PageHeader from '../components/PageHeader';
+import { useSearch } from '../context/SearchContext';
+import { matchesSearch } from '../utils/search';
 
 function ConfigFluxKanban() {
+  const { searchQuery } = useSearch();
   const [flux, setFlux] = useState([]);
   const [articles, setArticles] = useState([]);
   const [postes, setPostes] = useState([]);
@@ -153,11 +156,24 @@ function ConfigFluxKanban() {
     }
   };
 
+  const filteredFlux = flux.filter((item) =>
+    matchesSearch(item, searchQuery, [
+      'demande_moyenne',
+      'lead_time_jours',
+      'capacite_conteneur',
+      (f) => f.article_detail?.sku,
+      (f) => f.article_detail?.designation,
+      (f) => f.poste_fournisseur_detail?.nom,
+      (f) => f.poste_consommateur_detail?.nom,
+      (f) => (f.actif ? 'Actif' : 'Inactif'),
+    ]),
+  );
+
   return (
     <Box className="page-shell">
       <PageHeader
-        title="Configuration Flux Kanban"
-        subtitle="Paramétrage des flux, conteneurs et capacités par article."
+        title="Configuration flux"
+        subtitle="Flux Kanban, conteneurs et capacités par article."
         actions={
           <Button
             variant="outlined"
@@ -198,7 +214,7 @@ function ConfigFluxKanban() {
               </TableRow>
             </TableHead>
             <TableBody>
-              {flux.map((f) => (
+              {filteredFlux.map((f) => (
                 <TableRow key={f.id}>
                   <TableCell>
                     <Typography variant="body1" fontWeight="600">

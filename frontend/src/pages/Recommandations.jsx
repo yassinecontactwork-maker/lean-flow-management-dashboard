@@ -28,8 +28,11 @@ import {
 import { recommandationsAPI } from '../services/api';
 import PageHeader from '../components/PageHeader';
 import KpiCard from '../components/KpiCard';
+import { useSearch } from '../context/SearchContext';
+import { matchesSearch } from '../utils/search';
 
 function Recommandations() {
+  const { searchQuery } = useSearch();
   const [recommandations, setRecommandations] = useState([]);
   const [loading, setLoading] = useState(true);
   const [alert, setAlert] = useState(null);
@@ -136,11 +139,25 @@ function Recommandations() {
     return labels[value] || String(value || '').replaceAll('_', ' ');
   };
 
+  const filteredRecommandations = recommandations.filter((reco) =>
+    matchesSearch(reco, searchQuery, [
+      'quantite',
+      'priorite',
+      'justification',
+      'statut',
+      'type_recommandation',
+      (item) => item.buffer_detail?.article_sku,
+      (item) => item.buffer_detail?.poste_nom,
+      (item) => formatRecommandationLabel(item.statut),
+      (item) => formatRecommandationLabel(item.type_recommandation),
+    ]),
+  );
+
   return (
     <Box className="page-shell">
       <PageHeader
-        title="Recommandations DDMRP"
-        subtitle="Priorisation des actions de réapprovisionnement et arbitrage des buffers."
+        title="Recommandations"
+        subtitle="Actions DDMRP et arbitrage des buffers."
         actions={
           <Box sx={{ display: 'flex', gap: 2, flexWrap: 'wrap' }}>
             <Button variant="contained" startIcon={<AutoAwesomeIcon />} onClick={handleGenererAutomatiques}>
@@ -188,7 +205,7 @@ function Recommandations() {
               </TableRow>
             </TableHead>
             <TableBody>
-              {recommandations.map((reco) => (
+              {filteredRecommandations.map((reco) => (
                 <TableRow key={reco.id}>
                   <TableCell>
                     <Typography variant="body1" fontWeight="600">

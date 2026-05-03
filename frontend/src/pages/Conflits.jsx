@@ -31,8 +31,11 @@ import {
 import { conflitsAPI } from '../services/api';
 import PageHeader from '../components/PageHeader';
 import KpiCard from '../components/KpiCard';
+import { useSearch } from '../context/SearchContext';
+import { matchesSearch } from '../utils/search';
 
 function Conflits() {
+  const { searchQuery } = useSearch();
   const [conflits, setConflits] = useState([]);
   const [loading, setLoading] = useState(true);
   const [alert, setAlert] = useState(null);
@@ -131,11 +134,25 @@ function Conflits() {
     return labels[value] || String(value || '').replaceAll('_', ' ');
   };
 
+  const filteredConflits = conflits.filter((conflit) =>
+    matchesSearch(conflit, searchQuery, [
+      'description',
+      'type_conflit',
+      'statut',
+      'priorite',
+      (item) => item.article_detail?.sku,
+      (item) => item.article_detail?.designation,
+      (item) => item.poste_detail?.nom,
+      (item) => formatConflitLabel(item.type_conflit),
+      (item) => formatConflitLabel(item.statut),
+    ]),
+  );
+
   return (
     <Box className="page-shell">
       <PageHeader
-        title="Résolution de conflits multi-signaux"
-        subtitle="Arbitrage entre signaux Kanban, CONWIP et DDMRP en temps réel."
+        title="Conflits"
+        subtitle="Arbitrage entre signaux Kanban, CONWIP et DDMRP."
         actions={
           <Button variant="outlined" startIcon={<RefreshIcon />} onClick={loadConflits}>
             Actualiser
@@ -182,7 +199,7 @@ function Conflits() {
               </TableRow>
             </TableHead>
             <TableBody>
-              {conflits.map((conflit) => (
+              {filteredConflits.map((conflit) => (
                 <TableRow key={conflit.id}>
                   <TableCell>
                     <Chip

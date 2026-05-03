@@ -89,19 +89,19 @@ Elle utilise des buffers stratégiques afin de protéger le flux, absorber la va
 
 ### Tableau de bord
 
-![Dashboard](docs/dashboard.png)
+![Dashboard](./docs\dashboard.png)
 
 ### Gestion des ordres de fabrication
 
-![Ordres de fabrication](docs\ordres-fabrication.png)
+![Ordres de fabrication](./docs\ordres-fabrication.png)
 
 ### Buffers DDMRP
 
-![Buffers DDMRP](docs\buffers-ddmrp.png)
+![Buffers DDMRP](./docs\buffers-ddmrp.png)
 
 ### Alertes et conflits
 
-![Alertes](docs\alertes.png)
+![Alertes](./docs\alertes.pnggit add .)
 
 ---
 

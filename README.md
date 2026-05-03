@@ -89,7 +89,7 @@ Elle utilise des buffers stratégiques afin de protéger le flux, absorber la va
 
 ### Tableau de bord
 
-![Dashboard](./docs\dashboard.png)
+![Dashboard](./docs/dashboard.png)
 
 ### Gestion des ordres de fabrication
 
